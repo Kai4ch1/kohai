@@ -1,0 +1,9 @@
+{
+  "session_id": "dff5891b-76a1-482f-9357-a38ebac4e571",
+  "transcript_path": "/Users/tester/.claude-work/projects/-Users-tester-dev-kohai-demo/dff5891b-76a1-482f-9357-a38ebac4e571.jsonl",
+  "cwd": "/Users/tester/dev/kohai-demo",
+  "scratchpad_dir": "/Users/tester/.claude-scratch",
+  "hook_event_name": "SessionStart",
+  "source": "startup",
+  "model": "claude-sonnet-5-5"
+}

@@ -1,0 +1,17 @@
+{
+  "session_id": "0199a8e2-4c1b-7d10-9a3e-6f2b8c1d0e55",
+  "transcript_path": "/Users/tester/.codex/sessions/2026/10/01/rollout-2026-10-01T09-00-00-0199a8e2-4c1b-7d10-9a3e-6f2b8c1d0e55.jsonl",
+  "cwd": "/Users/tester/dev/api-server",
+  "model": "gpt-5.5-codex",
+  "permission_mode": "default",
+  "hook_event_name": "PostToolUse",
+  "turn_id": "turn-1",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "npm test"
+  },
+  "tool_response": {
+    "exit_code": 0
+  },
+  "tool_use_id": "call_1"
+}

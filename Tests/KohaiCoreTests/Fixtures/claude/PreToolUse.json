@@ -1,0 +1,18 @@
+{
+  "session_id": "dff5891b-76a1-482f-9357-a38ebac4e571",
+  "transcript_path": "/Users/tester/.claude-work/projects/-Users-tester-dev-kohai-demo/dff5891b-76a1-482f-9357-a38ebac4e571.jsonl",
+  "cwd": "/Users/tester/dev/kohai-demo",
+  "scratchpad_dir": "/Users/tester/.claude-scratch",
+  "prompt_id": "5178b94b-2bb4-491a-9d14-57f043504133",
+  "permission_mode": "default",
+  "effort": {
+    "level": "medium"
+  },
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "touch kohai-perm-test.txt",
+    "description": "Create empty test file"
+  },
+  "tool_use_id": "toolu_01TBB87hKK9fqXGFPdGcbAaw"
+}

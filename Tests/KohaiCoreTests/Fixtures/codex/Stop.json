@@ -1,0 +1,11 @@
+{
+  "session_id": "0199a8e2-4c1b-7d10-9a3e-6f2b8c1d0e55",
+  "transcript_path": "/Users/tester/.codex/sessions/2026/10/01/rollout-2026-10-01T09-00-00-0199a8e2-4c1b-7d10-9a3e-6f2b8c1d0e55.jsonl",
+  "cwd": "/Users/tester/dev/api-server",
+  "model": "gpt-5.5-codex",
+  "permission_mode": "default",
+  "hook_event_name": "Stop",
+  "turn_id": "turn-1",
+  "last_assistant_message": "All 42 tests pass.",
+  "stop_hook_active": false
+}

@@ -1,0 +1,19 @@
+{
+  "session_id": "dff5891b-76a1-482f-9357-a38ebac4e571",
+  "transcript_path": "/Users/tester/.claude-work/projects/-Users-tester-dev-kohai-demo/dff5891b-76a1-482f-9357-a38ebac4e571.jsonl",
+  "cwd": "/Users/tester/dev/kohai-demo",
+  "scratchpad_dir": "/Users/tester/.claude-scratch",
+  "prompt_id": "5178b94b-2bb4-491a-9d14-57f043504133",
+  "permission_mode": "default",
+  "agent_id": "a09117be49d0f5fa0",
+  "agent_type": "",
+  "effort": {
+    "level": "medium"
+  },
+  "hook_event_name": "SubagentStop",
+  "stop_hook_active": false,
+  "agent_transcript_path": "/Users/tester/.claude-work/projects/-Users-tester-dev-kohai-demo/dff5891b-76a1-482f-9357-a38ebac4e571/subagents/agent-a09117be49d0f5fa0.jsonl",
+  "last_assistant_message": "ls kohai-perm-test.txt",
+  "background_tasks": [],
+  "session_crons": []
+}
