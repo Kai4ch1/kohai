@@ -31,9 +31,13 @@ Events are ordered by the hook's timestamp; late or duplicate events are dropped
 
 - `Sources/KohaiCore` – event model, payload parser, state machine, terminal probe, Unix socket client/listener
 - `Sources/kohai-hook` – the hook CLI
-- `Sources/Kohai` – the menu bar app (built only on macOS)
+- `Sources/Kohai` – the menu bar app (built only on macOS). `KohaiApp.swift` / `SessionMenuView.swift` own the store
+  and map Core sessions to the design system's presentation models; `Design/` (tokens, copy), `Views/` and
+  `Previews/` are the design system and never import Core
 - `Tests/KohaiCoreTests` – unit tests; `Fixtures/claude` are payloads captured from Claude Code 2.1.286, `Fixtures/codex` are built from Codex's hook schemas
 - `Tests/KohaiHookTests` – runs the built `kohai-hook` binary (exit code, silence, 200 ms budget)
+- `Tests/KohaiTests` – token contrast checks; `SnapshotTests` renders every preview state to `design-snapshots/*.png`
+  (set `KOHAI_SNAPSHOT_DIR` to write them elsewhere)
 - `Support/Info.plist`, `scripts/build-app.sh` – app bundle (LSUIElement, ad-hoc signed)
 
 ## Build and test

@@ -23,7 +23,17 @@ var targets: [Target] = [
 // evaluated on macOS. Core and hook stay buildable elsewhere.
 #if os(macOS)
 products.append(.executable(name: "Kohai", targets: ["Kohai"]))
-targets.append(.executableTarget(name: "Kohai", dependencies: ["KohaiCore"]))
+targets.append(.executableTarget(
+    name: "Kohai",
+    dependencies: ["KohaiCore"],
+    exclude: [
+        "Design/CopyTable.md",
+        "Design/MenuBarIconSpec.md",
+        "Design/TokenContrast.md",
+    ]
+))
+// Token contrast checks and the design snapshot renderer (writes design-snapshots/*.png).
+targets.append(.testTarget(name: "KohaiTests", dependencies: ["Kohai"]))
 #endif
 
 let package = Package(
