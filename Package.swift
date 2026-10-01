@@ -26,9 +26,14 @@ products.append(.executable(name: "Kohai", targets: ["Kohai"]))
 targets.append(.executableTarget(
     name: "Kohai",
     dependencies: ["KohaiCore"],
-    // The design system (built separately, not yet integrated) lives here too; keep it out of M1.
-    exclude: ["Design", "Views", "Previews"]
+    exclude: [
+        "Design/CopyTable.md",
+        "Design/MenuBarIconSpec.md",
+        "Design/TokenContrast.md",
+    ]
 ))
+// Token contrast checks and the design snapshot renderer (writes design-snapshots/*.png).
+targets.append(.testTarget(name: "KohaiTests", dependencies: ["Kohai"]))
 #endif
 
 let package = Package(
