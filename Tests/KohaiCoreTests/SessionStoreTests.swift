@@ -174,7 +174,8 @@ struct OrderingTests {
         var store = SessionStore()
         store.apply(event(.promptSubmit, at: 1))
         store.apply(event(.sessionEnd, at: 5))
-        #expect(!store.apply(event(.stop, at: 4)))
+        let changed1 = store.apply(event(.stop, at: 4))
+        #expect(!changed1)
         #expect(store.sessions.isEmpty)
     }
 
@@ -193,13 +194,16 @@ struct OrderingTests {
         store.apply(event(.sessionEnd, at: 9))
         #expect(store.sessions.isEmpty)
         // ...and the removal is remembered from the newest time seen.
-        #expect(!store.apply(event(.stop, at: 10)))
+        let changed2 = store.apply(event(.stop, at: 10))
+        #expect(!changed2)
     }
 
     @Test func sessionEndForUnknownSessionBlocksLateEvents() {
         var store = SessionStore()
-        #expect(!store.apply(event(.sessionEnd, at: 5)))
-        #expect(!store.apply(event(.permissionRequest, at: 4, toolKey: "k")))
+        let changed3 = store.apply(event(.sessionEnd, at: 5))
+        #expect(!changed3)
+        let changed4 = store.apply(event(.permissionRequest, at: 4, toolKey: "k"))
+        #expect(!changed4)
         #expect(store.sessions.isEmpty)
     }
 
@@ -229,9 +233,11 @@ struct DuplicateTests {
     @Test func sameEventTwiceIsIdempotent() {
         var store = SessionStore()
         let request = event(.permissionRequest, at: 1, message: "Permission: Bash", toolKey: "k")
-        #expect(store.apply(request))
+        let changed5 = store.apply(request)
+        #expect(changed5)
         let snapshot = store.sessions
-        #expect(!store.apply(request))
+        let changed6 = store.apply(request)
+        #expect(!changed6)
         #expect(store.sessions == snapshot)
         #expect(store.needsInputCount == 1)
     }
@@ -262,7 +268,8 @@ struct ClearTests {
         store.clear(SessionKey(agent: .claude, sessionID: "s1"), at: t0.addingTimeInterval(2))
         #expect(store.sessions.isEmpty)
         #expect(store.needsInputCount == 0)
-        #expect(!store.apply(event(.toolFinished, at: 1.5, toolKey: "k"))) // older than the clear
+        let changed7 = store.apply(event(.toolFinished, at: 1.5, toolKey: "k"))
+        #expect(!changed7) // older than the clear
         store.apply(event(.promptSubmit, at: 3))
         #expect(status(store) == .working)
     }

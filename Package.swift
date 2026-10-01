@@ -23,7 +23,12 @@ var targets: [Target] = [
 // evaluated on macOS. Core and hook stay buildable elsewhere.
 #if os(macOS)
 products.append(.executable(name: "Kohai", targets: ["Kohai"]))
-targets.append(.executableTarget(name: "Kohai", dependencies: ["KohaiCore"]))
+targets.append(.executableTarget(
+    name: "Kohai",
+    dependencies: ["KohaiCore"],
+    // The design system (built separately, not yet integrated) lives here too; keep it out of M1.
+    exclude: ["Design", "Views", "Previews"]
+))
 #endif
 
 let package = Package(
