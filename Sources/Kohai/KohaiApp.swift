@@ -24,6 +24,8 @@ struct KohaiApp: App {
 final class AppModel {
     private(set) var store = SessionStore()
     private(set) var listenerError: String?
+    /// Set when a jump was refused by macOS; the dropdown then explains how to allow it.
+    var automationDenied = false
     @ObservationIgnored private var listener: SocketListener?
 
     let home = NSHomeDirectory()
@@ -56,6 +58,17 @@ final class AppModel {
 
     func clear(_ key: SessionKey) {
         store.clear(key, at: Date())
+    }
+
+    func jump(to key: SessionKey) {
+        guard let terminal = store.sessions[key]?.terminal else { return }
+        Task {
+            switch await TerminalJumper.jump(to: terminal) {
+            case .jumped: automationDenied = false
+            case .notFound: NSSound.beep()
+            case .automationDenied: automationDenied = true
+            }
+        }
     }
 }
 

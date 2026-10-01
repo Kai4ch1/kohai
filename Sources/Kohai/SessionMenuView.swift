@@ -64,6 +64,13 @@ struct SessionMenuView: View {
                 model.stop()
                 _ = model.start()
             }
+        } else if model.automationDenied {
+            KohaiStateDropdown(kind: .automationDenied) {
+                model.automationDenied = false
+                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
         } else if model.store.sessions.isEmpty {
             KohaiStateDropdown(kind: .empty)
         } else {
@@ -74,6 +81,9 @@ struct SessionMenuView: View {
                 }
                 KohaiDropdown(
                     sessions: rows,
+                    onJump: { row in
+                        if let key = SessionRowModel.key(forID: row.id) { model.jump(to: key) }
+                    },
                     onClear: { row in
                         if let key = SessionRowModel.key(forID: row.id) { model.clear(key) }
                     })
