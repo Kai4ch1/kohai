@@ -23,7 +23,7 @@ public enum EventKind: String, Codable, Sendable, CaseIterable {
     case sessionEnd
 }
 
-/// Where the agent runs. Captured now; used by tab focusing in a later milestone.
+/// Where the agent runs. Used by `TerminalJump` to focus the session's tab.
 public struct TerminalInfo: Codable, Sendable, Equatable {
     /// TERM_PROGRAM, e.g. "iTerm.app", "Apple_Terminal", "tmux".
     public var termProgram: String?
