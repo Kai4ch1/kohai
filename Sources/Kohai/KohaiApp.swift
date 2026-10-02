@@ -28,7 +28,13 @@ final class AppModel {
     @ObservationIgnored private var listener: SocketListener?
 
     let home = NSHomeDirectory()
-    let connections = AgentConnections()
+    let settings: SettingsModel
+    let connections: AgentConnections
+
+    init(settings: SettingsModel = SettingsModel()) {
+        self.settings = settings
+        connections = AgentConnections(settings: settings)
+    }
     /// The dropdown is on the Agents screen (footer link, hint, or the icon's right-click menu).
     var showingConnect = false
     /// Done was pressed on the connect screen: don't push it again until relaunch.

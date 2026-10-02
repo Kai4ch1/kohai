@@ -1,8 +1,10 @@
 import Foundation
 
-/// Named colors only: the app maps them to design tokens, so settings never carry raw RGB.
+/// Named colors only: the app maps each to one of the design's eight muted traditional tones,
+/// so settings never carry raw RGB. There is deliberately no red (vermilion means "needs input")
+/// and no purple (the design forbids the 240-320° hue band).
 public enum LabelColor: String, Codable, Sendable, CaseIterable {
-    case blue, orange, green, purple, pink, red, yellow, teal, gray
+    case blue, orange, green, teal, gold, brown, pink, gray
 }
 
 /// User-given name and color for one agent config dir.

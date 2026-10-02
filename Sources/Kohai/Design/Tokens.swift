@@ -75,6 +75,11 @@ struct KohaiColor: Sendable, Equatable {
 
 // MARK: - Palette
 
+/// The user-pickable colors for accounts and spaces (presentation side of Core's `LabelColor`).
+enum LabelTone: String, CaseIterable, Sendable {
+    case blue, orange, green, teal, gold, brown, pink, gray
+}
+
 struct KohaiPalette: Sendable {
 
     struct TextColors: Sendable {
@@ -138,6 +143,20 @@ struct KohaiPalette: Sendable {
     let preview: PreviewColors
     /// 8 desaturated Japanese traditional tones. Hue band 240-320 is forbidden (enforced by TokenTests).
     let projectStripes: [KohaiColor]
+
+    /// Account / space color by the name stored in settings. Same eight tones as the stripes.
+    func label(_ tone: LabelTone) -> KohaiColor {
+        switch tone {
+        case .green: projectStripes[0]  // matcha
+        case .gold: projectStripes[1]   // kincha
+        case .teal: projectStripes[2]   // asagi
+        case .gray: projectStripes[3]   // nezumi
+        case .brown: projectStripes[4]  // kakishibu
+        case .orange: projectStripes[5] // yamabuki
+        case .blue: projectStripes[6]   // wasurenagusa
+        case .pink: projectStripes[7]   // sakura
+        }
+    }
 
     /// Deterministic (FNV-1a) so a project keeps its color across launches.
     /// `hashValue` is randomized per process and must not be used here.

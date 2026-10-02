@@ -31,13 +31,13 @@ final class AgentConnections {
     let hookPath: String
     private let home: String
     @ObservationIgnored private var seenConfigDirs: [AgentAccount] = []
-    private var declined = Set(UserDefaults.standard.stringArray(forKey: AgentConnections.declinedKey) ?? [])
 
-    private static let extraAccountsKey = "extraAccounts"
-    private static let declinedKey = "declinedAccounts"
+    /// Hand-added folders and declined accounts live in the settings file.
+    @ObservationIgnored private let settings: SettingsModel
 
-    init(home: String = NSHomeDirectory()) {
+    init(home: String = NSHomeDirectory(), settings: SettingsModel) {
         self.home = home
+        self.settings = settings
         let executable = Bundle.main.executableURL ?? URL(fileURLWithPath: CommandLine.arguments[0])
         hookPath = executable.deletingLastPathComponent().appendingPathComponent("kohai-hook").path
     }
@@ -48,15 +48,16 @@ final class AgentConnections {
     /// connected to an old kohai-hook, which always counts because it silently stopped working.
     var pendingCount: Int {
         states.filter { id, state in
-            state == .needsUpdate || (state == .notConnected && !declined.contains(id))
+            state == .needsUpdate || (state == .notConnected && !settings.settings.declinedAccounts.contains(id))
         }.count
     }
 
     /// The user reviewed the list and left these unticked: stop hinting about them.
     func declinePending() {
         let pending = states.filter { $0.value == .notConnected }.map(\.key)
-        declined.formUnion(pending)
-        UserDefaults.standard.set(Array(declined), forKey: Self.declinedKey)
+        settings.update { s in
+            for id in pending.sorted() where !s.declinedAccounts.contains(id) { s.declinedAccounts.append(id) }
+        }
     }
 
     /// Re-reads everything. Cheap: a home listing plus one small file per account.
@@ -65,7 +66,7 @@ final class AgentConnections {
         seenConfigDirs = seen
         let fm = FileManager.default
         var found = AccountDiscovery.discover(home: home) { try? fm.contentsOfDirectory(atPath: $0) }
-        for account in extraAccounts + seen where !found.contains(account) {
+        for account in settings.settings.extraAccounts + seen where !found.contains(account) {
             found.append(account)
         }
         accounts = found
@@ -117,10 +118,8 @@ final class AgentConnections {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         let contents = (try? FileManager.default.contentsOfDirectory(atPath: url.path)) ?? []
         let account = AgentAccount(agent: AccountDiscovery.guessAgent(contents: contents), configDir: url.path)
-        var extras = extraAccounts
-        if !extras.contains(account) {
-            extras.append(account)
-            extraAccounts = extras
+        settings.update { s in
+            if !s.extraAccounts.contains(account) { s.extraAccounts.append(account) }
         }
         refresh(seen: seenConfigDirs)
     }
@@ -151,15 +150,5 @@ final class AgentConnections {
         default: reason = error.localizedDescription
         }
         return HookFileFailure(file: abbreviateHome(account.hookFilePath, home: home), reason: reason)
-    }
-
-    private var extraAccounts: [AgentAccount] {
-        get {
-            guard let data = UserDefaults.standard.data(forKey: Self.extraAccountsKey) else { return [] }
-            return (try? JSONDecoder().decode([AgentAccount].self, from: data)) ?? []
-        }
-        set {
-            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: Self.extraAccountsKey)
-        }
     }
 }
