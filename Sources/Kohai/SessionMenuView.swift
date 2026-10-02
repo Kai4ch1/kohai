@@ -52,15 +52,25 @@ struct SessionMenuView: View {
     private var connections: AgentConnections { model.connections }
 
     var body: some View {
-        content
-            .background {
-                // ⌘Q while the dropdown has focus.
-                Button(Copy.quit.text(tone)) { NSApp.terminate(nil) }
-                    .keyboardShortcut("q")
-                    .hidden()
-            }
-            .onAppear { model.refreshConnections() }
-            .kohaiThemed()
+        VStack(spacing: 0) {
+            content
+            // Every screen, errors included: click the icon, click Quit.
+            DropdownFooter(
+                onAgents: isShowingConnect ? nil : { showingConnect = true },
+                onQuit: { NSApp.terminate(nil) })
+        }
+        .background {
+            // ⌘Q while the dropdown has focus.
+            Button(Copy.quit.text(tone)) { NSApp.terminate(nil) }
+                .keyboardShortcut("q")
+                .hidden()
+        }
+        .onAppear { model.refreshConnections() }
+        .kohaiThemed()
+    }
+
+    private var isShowingConnect: Bool {
+        model.listenerError == nil && !model.automationDenied && (showingConnect || needsOnboarding)
     }
 
     /// First run: nothing connected yet and nothing to show, so ask instead of showing "All quiet".
@@ -107,18 +117,14 @@ struct SessionMenuView: View {
             // A fresh selection whenever the set of accounts or their states change.
             .id(connections.accounts.map { "\($0.id)=\(String(describing: connections.states[$0.id]))" })
         } else if model.store.sessions.isEmpty {
-            VStack(spacing: 0) {
-                KohaiStateDropdown(kind: .empty)
-                footer
-            }
+            KohaiStateDropdown(kind: .empty)
         } else {
             // Rows show static "seconds in status", so re-map once a second.
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 let rows = model.store.sessions.values.map {
                     SessionRowModel(session: $0, now: context.date, home: model.home)
                 }
-                VStack(spacing: 0) {
-                    KohaiDropdown(
+                KohaiDropdown(
                         sessions: rows,
                         hint: connections.pendingCount > 0 ? .accountsPending(connections.pendingCount) : nil,
                         onJump: { row in
@@ -128,14 +134,8 @@ struct SessionMenuView: View {
                             if let key = SessionRowModel.key(forID: row.id) { model.clear(key) }
                         },
                         onDismissHint: { showingConnect = true })
-                    footer
-                }
             }
         }
-    }
-
-    private var footer: some View {
-        DropdownFooter(onAgents: { showingConnect = true }, onQuit: { NSApp.terminate(nil) })
     }
 
     private var noticeText: String? {
