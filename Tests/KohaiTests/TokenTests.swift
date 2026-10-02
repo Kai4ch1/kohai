@@ -10,6 +10,23 @@ final class TokenTests: XCTestCase {
         ("dark-increase-contrast", .darkIncreasedContrast),
     ]
 
+    /// White default-button text on the neutral button fill.
+    func testButtonFillKeepsButtonTextReadable() {
+        let white = KohaiColor(0xFFFFFF)
+        for (name, p) in palettes {
+            let ratio = white.contrast(against: p.surface.buttonFill)
+            XCTAssertGreaterThanOrEqual(ratio, 4.5, "\(name) button text = \(ratio)")
+        }
+    }
+
+    /// Account / space colors are the stripe tones, so they inherit the forbidden-hue rule.
+    func testEveryLabelToneIsAStripeTone() {
+        for tone in LabelTone.allCases {
+            XCTAssertTrue(KohaiPalette.dark.projectStripes.contains(KohaiPalette.dark.label(tone)), "\(tone)")
+        }
+        XCTAssertEqual(Set(LabelTone.allCases.map { KohaiPalette.dark.label($0).hex }).count, LabelTone.allCases.count)
+    }
+
     // MARK: Contrast
 
     /// Every text token >= 4.5:1 on the nominal AND the worst-case lifted material stand-in.

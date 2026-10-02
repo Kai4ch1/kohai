@@ -5,32 +5,9 @@ import SwiftUI
 // The app is the only place that sees both KohaiCore and the design system: Core sessions are
 // mapped to the design's presentation models here, so the views never import Core.
 
-/// Menu bar status item: template mascot head, filled with a count when sessions need input.
-struct MenuBarLabel: View {
-    let needsInput: Int
-
-    @Environment(\.kohaiCopyTone) private var tone
-
-    var body: some View {
-        HStack(spacing: KohaiSpacing.xs) {
-            if let image = MenuBarImages.image(filled: needsInput > 0) {
-                Image(nsImage: image)
-            }
-            if needsInput > 0 {
-                Text(needsInput > 9 ? "9+" : "\(needsInput)")
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(
-            needsInput > 0
-                ? Copy.menuBarSome.text(tone, ["n": "\(needsInput)"])
-                : Copy.menuBarNone.text(tone))
-    }
-}
-
 /// Rendering the template image is not free and the label re-renders on every store change.
 @MainActor
-private enum MenuBarImages {
+enum MenuBarImages {
     private static var cache: [Bool: NSImage] = [:]
 
     static func image(filled: Bool) -> NSImage? {
@@ -44,23 +21,30 @@ private enum MenuBarImages {
 struct SessionMenuView: View {
     let model: AppModel
 
-    /// The user opened the connect screen from the footer or the hint.
-    @State private var showingConnect = false
-
     @Environment(\.kohaiCopyTone) private var tone
 
     private var connections: AgentConnections { model.connections }
 
     var body: some View {
-        content
-            .background {
-                // ⌘Q while the dropdown has focus.
-                Button(Copy.quit.text(tone)) { NSApp.terminate(nil) }
-                    .keyboardShortcut("q")
-                    .hidden()
-            }
-            .onAppear { model.refreshConnections() }
-            .kohaiThemed()
+        VStack(spacing: 0) {
+            content
+            // Every screen, errors included: click the icon, click Quit.
+            DropdownFooter(
+                onAgents: isShowingConnect ? nil : { model.showingConnect = true },
+                onQuit: { NSApp.terminate(nil) })
+        }
+        .background {
+            // ⌘Q while the dropdown has focus.
+            Button(Copy.quit.text(tone)) { NSApp.terminate(nil) }
+                .keyboardShortcut("q")
+                .hidden()
+        }
+        .onAppear { model.refreshConnections() }
+        .kohaiThemed()
+    }
+
+    private var isShowingConnect: Bool {
+        model.listenerError == nil && !model.automationDenied && (model.showingConnect || needsOnboarding)
     }
 
     /// First run: nothing connected yet and nothing to show, so ask instead of showing "All quiet".
@@ -83,42 +67,40 @@ struct SessionMenuView: View {
                     NSWorkspace.shared.open(url)
                 }
             }
-        } else if showingConnect || needsOnboarding {
+        } else if model.showingConnect || needsOnboarding {
             ConnectAgentsDropdown(
                 accounts: connections.accounts.map { AccountRowModel(account: $0, state: connections.states[$0.id], home: model.home) },
                 notice: noticeText,
                 onConnect: { ids in
                     connections.connect(ids)
-                    showingConnect = true // stay to show the restart reminder
+                    model.showingConnect = true // stay to show the restart reminder
                 },
                 onDisconnect: { id in
                     connections.disconnect(id)
-                    showingConnect = true
+                    model.showingConnect = true
                 },
                 onAddFolder: {
                     connections.addFolder()
-                    showingConnect = true
+                    model.showingConnect = true
                 },
                 onDone: {
                     connections.declinePending()
                     model.onboardingDismissed = true
-                    showingConnect = false
+                    model.showingConnect = false
                 })
             // A fresh selection whenever the set of accounts or their states change.
             .id(connections.accounts.map { "\($0.id)=\(String(describing: connections.states[$0.id]))" })
         } else if model.store.sessions.isEmpty {
-            VStack(spacing: 0) {
-                KohaiStateDropdown(kind: .empty)
-                footer
-            }
+            KohaiStateDropdown(kind: .empty)
         } else {
             // Rows show static "seconds in status", so re-map once a second.
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 let rows = model.store.sessions.values.map {
-                    SessionRowModel(session: $0, now: context.date, home: model.home)
+                    SessionRowModel(
+                        session: $0, now: context.date, home: model.home,
+                        label: model.settings.settings.label(forConfigDir: $0.configDir))
                 }
-                VStack(spacing: 0) {
-                    KohaiDropdown(
+                KohaiDropdown(
                         sessions: rows,
                         hint: connections.pendingCount > 0 ? .accountsPending(connections.pendingCount) : nil,
                         onJump: { row in
@@ -127,15 +109,9 @@ struct SessionMenuView: View {
                         onClear: { row in
                             if let key = SessionRowModel.key(forID: row.id) { model.clear(key) }
                         },
-                        onDismissHint: { showingConnect = true })
-                    footer
-                }
+                        onDismissHint: { model.showingConnect = true })
             }
         }
-    }
-
-    private var footer: some View {
-        DropdownFooter(onAgents: { showingConnect = true }, onQuit: { NSApp.terminate(nil) })
     }
 
     private var noticeText: String? {
@@ -169,16 +145,18 @@ extension AccountRowModel {
 }
 
 extension SessionRowModel {
-    init(session: Session, now: Date, home: String) {
+    /// `label`: the user's name and color for the session's config dir, if any.
+    init(session: Session, now: Date, home: String, label: AccountLabel? = nil) {
         self.init(
             id: Self.id(for: session.key),
             agent: AgentKind(session.agent),
             project: session.projectName,
             sessionName: Self.name(for: session),
-            account: session.accountLabel(home: home),
+            account: label?.name ?? session.accountLabel(home: home),
             status: SessionStatus(session.status),
             secondsInStatus: max(0, Int(now.timeIntervalSince(session.statusSince))),
-            lastMessage: session.message ?? "")
+            lastMessage: session.message ?? "",
+            accountTone: label.map { LabelTone($0.color) })
     }
 
     /// Session ids are only unique per agent, so the row id carries both.
@@ -201,6 +179,36 @@ extension SessionRowModel {
             return String(session.cwd.dropFirst(prefix.count))
         }
         return String(session.key.sessionID.prefix(8))
+    }
+}
+
+extension LabelTone {
+    init(_ color: LabelColor) {
+        switch color {
+        case .blue: self = .blue
+        case .orange: self = .orange
+        case .green: self = .green
+        case .teal: self = .teal
+        case .gold: self = .gold
+        case .brown: self = .brown
+        case .pink: self = .pink
+        case .gray: self = .gray
+        }
+    }
+}
+
+extension LabelColor {
+    init(_ tone: LabelTone) {
+        switch tone {
+        case .blue: self = .blue
+        case .orange: self = .orange
+        case .green: self = .green
+        case .teal: self = .teal
+        case .gold: self = .gold
+        case .brown: self = .brown
+        case .pink: self = .pink
+        case .gray: self = .gray
+        }
     }
 }
 

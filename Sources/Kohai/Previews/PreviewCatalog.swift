@@ -148,11 +148,55 @@ enum PreviewCatalog {
         })
     }
 
+    static let mainWindow = PreviewEntry(id: "23-main-window", title: "Main window: Work space, session selected") { _ in
+        AnyView(PreviewStage {
+            MainWindowColumns(
+                items: PreviewData.spaceItems, selectedSpace: .space(PreviewData.workSpaceID), title: "Work",
+                sessions: PreviewData.workSessions, selectedSession: PreviewData.workSessions[0].id,
+                detail: PreviewData.workDetail)
+        })
+    }
+
+    static let mainWindowEmpty = PreviewEntry(id: "24-main-window-empty", title: "Main window: empty space, nothing selected") { _ in
+        AnyView(PreviewStage {
+            MainWindowColumns(
+                items: PreviewData.spaceItems, selectedSpace: .unsorted, title: Copy.sidebarUnsorted.text(.polite),
+                sessions: [], selectedSession: nil, detail: nil)
+        })
+    }
+
+    static let mainWindowWarning = PreviewEntry(id: "25-main-window-settings-warning", title: "Main window: unreadable settings banner, serious") { _ in
+        AnyView(PreviewStage(tone: .serious) {
+            MainWindowColumns(
+                items: PreviewData.spaceItems, selectedSpace: .all, title: Copy.sidebarAll.text(.serious),
+                sessions: PreviewData.workSessions, selectedSession: nil, detail: nil,
+                banner: Copy.warningUnreadable.text(.serious, ["path": "~/Library/Application Support/Kohai/settings.json.bak"]))
+        })
+    }
+
+    static let spaceEditor = PreviewEntry(id: "26-space-editor", title: "Space editor: Work with three rule kinds (text fields are AppKit: blank in PNG)") { _ in
+        AnyView(PreviewStage {
+            SpaceEditor(
+                draft: .constant(SpaceDraft(name: "Work", tone: .orange, symbol: "briefcase", rules: [
+                    RuleDraft(kind: .account, value: "/Users/me/.claude-work"),
+                    RuleDraft(kind: .remote, value: "github.com/acme/*"),
+                    RuleDraft(kind: .folder, value: "/Users/me/work"),
+                ])),
+                isNew: false,
+                accounts: [
+                    AccountOption(id: "/Users/me/.claude", title: "Personal (~/.claude)", tone: .blue),
+                    AccountOption(id: "/Users/me/.claude-work", title: "Work (~/.claude-work)", tone: .orange),
+                ],
+                onDelete: {})
+        })
+    }
+
     /// Required states first, then the extra accessibility / tone variants.
     static let all: [PreviewEntry] = [
         main, firstRunHint, empty, hooksNotInstalled, socketError, automationDenied,
         manySessions, longNames, unknownAgent, overflowHidden, menuBarIcon, mascotSheet,
         mainIncreasedContrast, mainLifted, mainSerious, emptySerious, hooksSerious,
         connectFirstRun, connectMixed, connectNoneFound, connectSerious, mainPendingHint,
+        mainWindow, mainWindowEmpty, mainWindowWarning, spaceEditor,
     ]
 }

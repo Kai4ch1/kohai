@@ -56,3 +56,67 @@ are identical in both variants. Tone is chosen by the `kohaiCopyTone` environmen
 | `hint.accountsPending` | {n} not connected yet. | {n} not connected. |
 | `hint.connect` | Connect | Connect |
 | `footer.agents` | Agents… | Agents… |
+| `window.title` | Kohai | Kohai |
+| `sidebar.all` | Everyone | All sessions |
+| `sidebar.unsorted` | Unsorted | Unsorted |
+| `sidebar.spaces` | Spaces | Spaces |
+| `sidebar.newSpace` | New space… | New space… |
+| `space.edit` | Edit… | Edit… |
+| `space.mute` | Mute notifications | Mute notifications |
+| `space.unmute` | Unmute notifications | Unmute notifications |
+| `space.moveUp` | Move up | Move up |
+| `space.moveDown` | Move down | Move down |
+| `space.mutedLabel` | muted | muted |
+| `sessions.emptyTitle` | Nobody is here, senpai. | No sessions here. |
+| `sessions.emptyBody` | Sessions show up as soon as an agent starts. | Sessions appear when an agent starts. |
+| `detail.empty` | Pick someone and I'll tell you about them. | Select a session. |
+| `detail.jump` | Take me to their desk | Jump to terminal |
+| `detail.clear` | Forget this one | Clear from list |
+| `detail.project` | Project | Project |
+| `detail.folder` | Folder | Folder |
+| `detail.remote` | Git remote | Git remote |
+| `detail.noRemote` | none | none |
+| `detail.account` | Account | Account |
+| `detail.space` | Space | Space |
+| `detail.terminal` | Terminal | Terminal |
+| `detail.lastMessage` | Last words | Last message |
+| `detail.selectHint` | Shows the details | Shows details |
+| `terminal.claudeApp` | Claude app | Claude app |
+| `terminal.unknown` | unknown | unknown |
+| `warning.unreadable` | I couldn't read my notes, so I started fresh. Your old file is safe at {path}. | Settings could not be read; defaults are in use. The old file was kept at {path}. |
+| `warning.newer` | My notes were written by a newer Kohai, so I started fresh. They are safe at {path}. | Settings were written by a newer Kohai; defaults are in use. The file was kept at {path}. |
+| `warning.saveFailed` | I couldn't save my notes: {reason} | Settings could not be saved: {reason} |
+| `warning.showFile` | Show in Finder | Show in Finder |
+| `editor.newTitle` | A new space | New space |
+| `editor.editTitle` | Edit space | Edit space |
+| `editor.name` | Name | Name |
+| `editor.namePlaceholder` | Work | Work |
+| `editor.color` | Color | Color |
+| `editor.symbol` | Symbol | Symbol |
+| `editor.rules` | Who belongs here | Rules |
+| `editor.rulesHelp` | A session joins the first space whose rule fits. Accounts beat git remotes, which beat folders. | A session joins the first matching space. Account rules beat git remote rules, which beat folder rules. |
+| `editor.noRules` | No rules yet, so nobody joins on their own. | No rules: sessions never join this space. |
+| `rule.account` | Account | Account |
+| `rule.remote` | Git remote | Git remote |
+| `rule.folder` | Folder | Folder |
+| `rule.remotePlaceholder` | github.com/acme/* | github.com/acme/* |
+| `rule.chooseFolder` | Choose… | Choose… |
+| `rule.add` | Add rule | Add rule |
+| `rule.remove` | Remove rule | Remove rule |
+| `editor.save` | Save | Save |
+| `editor.cancel` | Cancel | Cancel |
+| `editor.delete` | Delete space | Delete space |
+| `editor.deleteHelp` | Its sessions go back to the next matching space or Unsorted. | Its sessions move to the next matching space or Unsorted. |
+| `settings.general` | General | General |
+| `settings.accounts` | Accounts | Accounts |
+| `notify.toggle` | Tap my shoulder when someone needs me | Notify when a session needs input |
+| `notify.help` | Once per request. Never for the session you're looking at, never for muted spaces. | One notification per request. None for the focused session or muted spaces. |
+| `notify.mutedSpaces` | Muted spaces | Muted spaces |
+| `notify.noSpaces` | No spaces yet. | No spaces yet. |
+| `notify.deniedTitle` | macOS won't let me tap your shoulder. | Notifications are turned off for Kohai. |
+| `notify.deniedBody` | Allow Kohai under Notifications in System Settings. | Allow Kohai in System Settings > Notifications. |
+| `notify.deniedAction` | Open System Settings | Open System Settings |
+| `notification.claudeApp` | Claude app | Claude app |
+| `accounts.help` | Give each config folder a name and color so you can tell them apart. | Name and color each agent config folder. |
+| `accounts.namePlaceholder` | Name | Name |
+| `accounts.unnamed` | unnamed | unnamed |

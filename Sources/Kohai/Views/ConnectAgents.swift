@@ -109,9 +109,13 @@ struct ConnectAgentsDropdown: View {
             Spacer(minLength: KohaiSpacing.sm)
             if let onDone, chosen.isEmpty {
                 Button(Copy.connectDone.text(tone), action: onDone)
+                    .buttonStyle(.bordered)
+                    .tint(palette.surface.buttonFill.color)  // default buttons otherwise take the system accent
                     .keyboardShortcut(.defaultAction)
             } else {
                 Button(Copy.connectAction.text(tone, ["n": "\(chosen.count)"])) { onConnect(chosen) }
+                    .buttonStyle(.bordered)
+                    .tint(palette.surface.buttonFill.color)  // default buttons otherwise take the system accent
                     .keyboardShortcut(.defaultAction)
                     .disabled(chosen.isEmpty)
             }
@@ -206,9 +210,10 @@ struct LinkButton: View {
     }
 }
 
-/// Bottom row under the list and the empty state: way back to the connect screen, and Quit.
+/// Bottom row of every dropdown screen, so Quit is always one click away.
+/// `onAgents` nil hides the Agents link (on the connect screen itself).
 struct DropdownFooter: View {
-    var onAgents: () -> Void = {}
+    var onAgents: (() -> Void)? = {}
     var onQuit: () -> Void = {}
 
     @Environment(\.kohaiCopyTone) private var tone
@@ -217,7 +222,9 @@ struct DropdownFooter: View {
         VStack(spacing: 0) {
             KohaiSeparator()
             HStack {
-                LinkButton(title: Copy.footerAgents.text(tone), action: onAgents)
+                if let onAgents {
+                    LinkButton(title: Copy.footerAgents.text(tone), action: onAgents)
+                }
                 Spacer()
                 LinkButton(title: Copy.quit.text(tone), action: onQuit)
             }

@@ -94,4 +94,40 @@ enum PreviewData {
             id: "claude:~/clients/acme/.claude", agent: .claudeCode,
             path: "~/clients/acme-corporation-long-folder-name/.claude", state: .unreadable("not valid JSON")),
     ]
+
+    // MARK: Main window (Milestone 2)
+
+    static let workSpaceID = UUID(uuidString: "00000000-0000-0000-0000-00000000000A")!
+    static let personalSpaceID = UUID(uuidString: "00000000-0000-0000-0000-00000000000B")!
+
+    private static func named(_ row: SessionRowModel, _ account: String, _ tone: LabelTone) -> SessionRowModel {
+        SessionRowModel(
+            id: row.id, agent: row.agent, project: row.project, sessionName: row.sessionName, account: account,
+            status: row.status, secondsInStatus: row.secondsInStatus, lastMessage: row.lastMessage, accountTone: tone)
+    }
+
+    /// The work space: named accounts with colors.
+    static let workSessions: [SessionRowModel] = [
+        named(mixed[0], "Work", .orange),
+        named(mixed[2], "Work", .orange),
+        named(mixed[4], "Work", .orange),
+        named(mixed[5], "Work", .orange),
+    ]
+
+    static let spaceItems: [SpaceItemModel] = [
+        SpaceItemModel(id: .all, name: Copy.sidebarAll.text(.polite), symbol: "tray.2", tone: nil, sessionCount: 7, needsInputCount: 2),
+        SpaceItemModel(id: .unsorted, name: Copy.sidebarUnsorted.text(.polite), symbol: "questionmark.folder", tone: nil, sessionCount: 1, needsInputCount: 0),
+        SpaceItemModel(id: .space(workSpaceID), name: "Work", symbol: "briefcase", tone: .orange, sessionCount: 4, needsInputCount: 2),
+        SpaceItemModel(id: .space(personalSpaceID), name: "Personal", symbol: "house", tone: .blue, sessionCount: 2, needsInputCount: 0, muted: true),
+    ]
+
+    static let workDetail = SessionDetailModel(
+        row: workSessions[0],
+        folder: "~/work/yheat",
+        gitRemote: "github.com/acme/yheat",
+        spaceName: "Work",
+        spaceSymbol: "briefcase",
+        spaceTone: .orange,
+        terminal: "Terminal.app · /dev/ttys004")
 }
+
