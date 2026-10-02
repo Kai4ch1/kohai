@@ -36,7 +36,6 @@ struct GitRemoteURLTests {
         ("https://github.com/Kai4ch1/kohai.git", "github.com/Kai4ch1/kohai"),
         ("https://github.com/Kai4ch1/kohai", "github.com/Kai4ch1/kohai"),
         ("https://github.com/Kai4ch1/kohai/", "github.com/Kai4ch1/kohai"),
-        ("https://user:s3cret@GitHub.com:443/Kai4ch1/kohai.git", "github.com/Kai4ch1/kohai"),
         ("http://gitlab.example.com:8080/group/sub/project.git", "gitlab.example.com/group/sub/project"),
         ("ssh://git@github.com/acme/api.git", "github.com/acme/api"),
         ("ssh://git@github.com:2222/acme/api.git", "github.com/acme/api"),
@@ -60,8 +59,22 @@ struct GitRemoteURLTests {
         #expect(GitRemote.normalize(url) == nil)
     }
 
+    /// URLs with a user and password. Assembled at runtime from obviously fake parts so secret
+    /// scanners (GitGuardian) don't flag the test source as a leaked Basic Auth string.
+    private static func withCredentials(_ user: String, _ password: String, _ rest: String) -> String {
+        "https://" + user + ":" + password + "@" + rest
+    }
+
+    @Test func credentialsAndPortAreStripped() {
+        let url = Self.withCredentials("fake-user", "FAKE-PASSWORD", "GitHub.com:443/Kai4ch1/kohai.git")
+        #expect(GitRemote.normalize(url) == "github.com/Kai4ch1/kohai")
+    }
+
     @Test func secretsNeverSurvive() {
-        #expect(GitRemote.normalize("https://x-access-token:ghp_abc@github.com/a/b.git")?.contains("ghp_") == false)
+        let url = Self.withCredentials("x-access-token", "FAKE-TOKEN-FOR-TESTS", "github.com/a/b.git")
+        let normalized = GitRemote.normalize(url)
+        #expect(normalized == "github.com/a/b")
+        #expect(normalized?.contains("FAKE") == false)
     }
 }
 
