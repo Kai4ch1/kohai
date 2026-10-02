@@ -8,12 +8,11 @@ struct KohaiApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            SessionMenuView(model: appDelegate.model)
-        } label: {
-            MenuBarLabel(needsInput: appDelegate.model.store.needsInputCount)
+        // The menu bar icon is an NSStatusItem (see StatusItemController); the main window and
+        // the real Settings screen come with the Milestone 2 UI.
+        Settings {
+            EmptyView()
         }
-        .menuBarExtraStyle(.window)
     }
 }
 
@@ -30,6 +29,8 @@ final class AppModel {
 
     let home = NSHomeDirectory()
     let connections = AgentConnections()
+    /// The dropdown is on the Agents screen (footer link, hint, or the icon's right-click menu).
+    var showingConnect = false
     /// Done was pressed on the connect screen: don't push it again until relaunch.
     var onboardingDismissed = false
 
@@ -85,10 +86,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let model = AppModel()
     private var signalSources: [DispatchSourceSignal] = []
 
+    private var statusItem: StatusItemController?
+
     func applicationWillFinishLaunching(_ notification: Notification) {
-        // LSUIElement in Info.plist hides the Dock icon for the bundled app; this also covers
-        // running the bare executable from Xcode or `swift run`.
-        NSApp.setActivationPolicy(.accessory)
+        // A regular app: Dock icon, and the Dock's right-click menu brings Quit for free.
+        // Also covers running the bare executable from Xcode or `swift run`.
+        NSApp.setActivationPolicy(.regular)
+    }
+
+    /// Clicking the Dock icon opens the dropdown until the main window exists.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        statusItem?.showDropdown()
+        return false
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -106,6 +115,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil) // another instance is running
         }
         model.refreshConnections()
+        statusItem = StatusItemController(model: model)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
