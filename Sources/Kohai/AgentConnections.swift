@@ -1,6 +1,9 @@
 import AppKit
 import KohaiCore
 import Observation
+import os
+
+private let log = Logger(subsystem: "io.github.kai4ch1.kohai", category: "connections")
 
 enum ConnectNotice: Equatable {
     /// Hooks load at session start, so running sessions need a restart.
@@ -70,15 +73,19 @@ final class AgentConnections {
             let data = fm.contents(atPath: account.hookFilePath)
             return (account.id, HookConfig.status(of: data, agent: account.agent, hookPath: hookPath))
         })
+        log.debug("refresh: \(self.states.map { "\($0.key)=\($0.value)" }.sorted().joined(separator: ", "), privacy: .public)")
     }
 
     func connect(_ ids: [AgentAccount.ID]) {
+        log.info("connect requested: \(ids, privacy: .public); known: \(self.accounts.map(\.id), privacy: .public)")
         notice = nil
         var failures: [HookFileFailure] = []
         for account in accounts where ids.contains(account.id) {
             do {
                 try rewrite(account) { try HookConfig.install(into: $0, agent: account.agent, hookPath: hookPath) }
+                log.info("connected \(account.hookFilePath, privacy: .public)")
             } catch {
+                log.error("connect failed for \(account.hookFilePath, privacy: .public): \(error, privacy: .public)")
                 failures.append(failure(account, error))
             }
         }
@@ -91,7 +98,9 @@ final class AgentConnections {
         guard let account = accounts.first(where: { $0.id == id }) else { return }
         do {
             try rewrite(account) { try HookConfig.uninstall(from: $0, agent: account.agent) }
+            log.info("disconnected \(account.hookFilePath, privacy: .public)")
         } catch {
+            log.error("disconnect failed for \(account.hookFilePath, privacy: .public): \(error, privacy: .public)")
             notice = .failed([failure(account, error)])
         }
         refresh(seen: seenConfigDirs)
