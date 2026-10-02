@@ -107,6 +107,9 @@ struct KohaiPalette: Sendable {
         let separator: KohaiColor
         /// Keyboard-selected row. Low-opacity washi over the system material.
         let rowHighlight: KohaiColor
+        /// Fill of the default (Return) button. Neutral, because the accent is reserved for
+        /// needs-input; dark enough for white button text at >= 4.5:1.
+        let buttonFill: KohaiColor
     }
 
     struct MascotColors: Sendable {
@@ -211,7 +214,8 @@ extension KohaiPalette {
         ),
         surface: SurfaceColors(
             separator: KohaiColor(0xF1EEE7, opacity: 0.12),
-            rowHighlight: KohaiColor(0xF1EEE7, opacity: 0.10)
+            rowHighlight: KohaiColor(0xF1EEE7, opacity: 0.10),
+            buttonFill: KohaiColor(0x57534E)
         ),
         mascot: MascotColors(line: KohaiColor(0xCBC7BD)),
         icon: IconColors(templateInk: KohaiColor(0x000000)),
@@ -234,7 +238,8 @@ extension KohaiPalette {
         ),
         surface: SurfaceColors(
             separator: KohaiColor(0xFAF8F3, opacity: 0.35),
-            rowHighlight: KohaiColor(0xFAF8F3, opacity: 0.18)
+            rowHighlight: KohaiColor(0xFAF8F3, opacity: 0.18),
+            buttonFill: KohaiColor(0x45423E)
         ),
         mascot: MascotColors(line: KohaiColor(0xE4E0D7)),
         icon: IconColors(templateInk: KohaiColor(0x000000)),
@@ -323,6 +328,14 @@ enum KohaiMetrics {
     static let statusColumnWidth: CGFloat = 52
     /// Menu bar icon canvas. The macOS menu bar is 24 pt tall (Apple HIG).
     static let menuBarIconCanvas: CGFloat = 18
+    /// Account / space color dot.
+    static let labelDot: CGFloat = 7
+    /// Main window columns.
+    static let sidebarWidth: CGFloat = 220
+    static let sessionColumnWidth: CGFloat = 360
+    static let detailMinWidth: CGFloat = 340
+    /// Color swatch in pickers.
+    static let swatch: CGFloat = 20
 }
 
 /// Mascot placeholder slot sizes (pt).

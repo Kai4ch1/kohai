@@ -7,9 +7,16 @@ import SwiftUI
 struct KohaiApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
+    static let mainWindowID = "main"
+
     var body: some Scene {
-        // The menu bar icon is an NSStatusItem (see StatusItemController); the main window and
-        // the real Settings screen come with the Milestone 2 UI.
+        // One main window; closing it keeps Kohai running in the menu bar and the Dock.
+        // The menu bar icon itself is an NSStatusItem (see StatusItemController).
+        Window(Copy.windowTitle.text(.polite), id: Self.mainWindowID) {
+            MainWindowView(model: appDelegate.model)
+        }
+        .defaultSize(width: 1100, height: 640)
+
         Settings {
             EmptyView()
         }
@@ -35,6 +42,24 @@ final class AppModel {
         self.settings = settings
         connections = AgentConnections(settings: settings)
     }
+    @ObservationIgnored let gitRemotes = GitRemoteCache()
+    /// The session the user is looking at in a focused main window; never notified.
+    var focusedSession: SessionKey?
+    /// Set by the main window once it has appeared (SwiftUI's openWindow, usable from AppKit).
+    @ObservationIgnored var openMainWindow: (() -> Void)?
+
+    func traits(for session: Session) -> SessionTraits {
+        SessionTraits(
+            configDir: session.configDir,
+            gitRemote: gitRemotes.remote(forFolder: session.projectDir),
+            folder: session.projectDir)
+    }
+
+    /// nil = Unsorted.
+    func spaceID(for session: Session) -> UUID? {
+        SpaceRules.space(for: traits(for: session), in: settings.settings)
+    }
+
     /// The dropdown is on the Agents screen (footer link, hint, or the icon's right-click menu).
     var showingConnect = false
     /// Done was pressed on the connect screen: don't push it again until relaunch.
@@ -100,10 +125,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
     }
 
-    /// Clicking the Dock icon opens the dropdown until the main window exists.
+    /// Clicking the Dock icon with no window open reopens the main window.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        statusItem?.showDropdown()
-        return false
+        if !flag { model.openMainWindow?() }
+        return true
+    }
+
+    /// Closing the window must not quit: the menu bar icon keeps working.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {

@@ -109,9 +109,13 @@ struct ConnectAgentsDropdown: View {
             Spacer(minLength: KohaiSpacing.sm)
             if let onDone, chosen.isEmpty {
                 Button(Copy.connectDone.text(tone), action: onDone)
+                    .buttonStyle(.bordered)
+                    .tint(palette.surface.buttonFill.color)  // default buttons otherwise take the system accent
                     .keyboardShortcut(.defaultAction)
             } else {
                 Button(Copy.connectAction.text(tone, ["n": "\(chosen.count)"])) { onConnect(chosen) }
+                    .buttonStyle(.bordered)
+                    .tint(palette.surface.buttonFill.color)  // default buttons otherwise take the system accent
                     .keyboardShortcut(.defaultAction)
                     .disabled(chosen.isEmpty)
             }

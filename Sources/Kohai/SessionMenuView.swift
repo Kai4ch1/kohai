@@ -96,7 +96,9 @@ struct SessionMenuView: View {
             // Rows show static "seconds in status", so re-map once a second.
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 let rows = model.store.sessions.values.map {
-                    SessionRowModel(session: $0, now: context.date, home: model.home)
+                    SessionRowModel(
+                        session: $0, now: context.date, home: model.home,
+                        label: model.settings.settings.label(forConfigDir: $0.configDir))
                 }
                 KohaiDropdown(
                         sessions: rows,
@@ -143,16 +145,18 @@ extension AccountRowModel {
 }
 
 extension SessionRowModel {
-    init(session: Session, now: Date, home: String) {
+    /// `label`: the user's name and color for the session's config dir, if any.
+    init(session: Session, now: Date, home: String, label: AccountLabel? = nil) {
         self.init(
             id: Self.id(for: session.key),
             agent: AgentKind(session.agent),
             project: session.projectName,
             sessionName: Self.name(for: session),
-            account: session.accountLabel(home: home),
+            account: label?.name ?? session.accountLabel(home: home),
             status: SessionStatus(session.status),
             secondsInStatus: max(0, Int(now.timeIntervalSince(session.statusSince))),
-            lastMessage: session.message ?? "")
+            lastMessage: session.message ?? "",
+            accountTone: label.map { LabelTone($0.color) })
     }
 
     /// Session ids are only unique per agent, so the row id carries both.
@@ -175,6 +179,36 @@ extension SessionRowModel {
             return String(session.cwd.dropFirst(prefix.count))
         }
         return String(session.key.sessionID.prefix(8))
+    }
+}
+
+extension LabelTone {
+    init(_ color: LabelColor) {
+        switch color {
+        case .blue: self = .blue
+        case .orange: self = .orange
+        case .green: self = .green
+        case .teal: self = .teal
+        case .gold: self = .gold
+        case .brown: self = .brown
+        case .pink: self = .pink
+        case .gray: self = .gray
+        }
+    }
+}
+
+extension LabelColor {
+    init(_ tone: LabelTone) {
+        switch tone {
+        case .blue: self = .blue
+        case .orange: self = .orange
+        case .green: self = .green
+        case .teal: self = .teal
+        case .gold: self = .gold
+        case .brown: self = .brown
+        case .pink: self = .pink
+        case .gray: self = .gray
+        }
     }
 }
 

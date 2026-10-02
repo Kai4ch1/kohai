@@ -59,10 +59,13 @@ struct SessionRowModel: Identifiable, Hashable, Sendable {
     let agent: AgentKind
     let project: String
     let sessionName: String
+    /// Account name the user gave it, else the config path.
     let account: String?
     let status: SessionStatus
     let secondsInStatus: Int
     let lastMessage: String
+    /// The account's color, when the user picked one.
+    var accountTone: LabelTone? = nil
 }
 
 struct ProjectGroup: Identifiable, Hashable, Sendable {

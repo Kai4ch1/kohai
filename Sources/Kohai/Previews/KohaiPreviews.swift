@@ -24,3 +24,7 @@ import SwiftUI
 #Preview("20 Connect, none found") { PreviewCatalog.connectNoneFound.make(false) }
 #Preview("21 Connect, serious") { PreviewCatalog.connectSerious.make(false) }
 #Preview("22 Accounts pending hint") { PreviewCatalog.mainPendingHint.make(false) }
+#Preview("23 Main window") { PreviewCatalog.mainWindow.make(false) }
+#Preview("24 Main window, empty") { PreviewCatalog.mainWindowEmpty.make(false) }
+#Preview("25 Main window, warning") { PreviewCatalog.mainWindowWarning.make(false) }
+#Preview("26 Space editor") { PreviewCatalog.spaceEditor.make(false) }

@@ -8,6 +8,8 @@ struct SessionRow: View {
     let session: SessionRowModel
     var isSelected: Bool = false
     var onJump: () -> Void = {}
+    /// VoiceOver hint for the click; the main window selects instead of jumping.
+    var actionHint: String? = nil
 
     @Environment(\.kohaiPalette) private var palette
     @Environment(\.kohaiCopyTone) private var tone
@@ -19,7 +21,7 @@ struct SessionRow: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(spokenLabel)
-        .accessibilityHint(Copy.jumpHint.text(tone))
+        .accessibilityHint(actionHint ?? Copy.jumpHint.text(tone))
         .accessibilityAddTraits(traits)
         .help("\(session.project) / \(session.sessionName)")
     }
@@ -34,11 +36,19 @@ struct SessionRow: View {
                     .foregroundStyle(palette.text.primary.color)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                Text(secondaryLine)
-                    .font(KohaiType.secondary)
-                    .foregroundStyle(palette.text.secondary.color)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                HStack(spacing: KohaiSpacing.xs) {
+                    if let accountTone = session.accountTone {
+                        Circle()
+                            .fill(palette.label(accountTone).color)
+                            .frame(width: KohaiMetrics.labelDot, height: KohaiMetrics.labelDot)
+                            .accessibilityHidden(true)
+                    }
+                    Text(secondaryLine)
+                        .font(KohaiType.secondary)
+                        .foregroundStyle(palette.text.secondary.color)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
                 Text(session.lastMessage)
                     .font(KohaiType.secondary)
                     .foregroundStyle(palette.text.tertiary.color)
