@@ -5,6 +5,8 @@ enum KohaiHint: Sendable {
     case firstRun
     /// Shown when the icon was found hidden in the menu bar overflow.
     case overflow
+    /// Some found agent accounts are not connected (or point at an old app). Its button connects.
+    case accountsPending(Int)
 }
 
 /// The ~360 pt menu bar dropdown: header, optional one-line hint, sessions
@@ -58,7 +60,7 @@ struct KohaiDropdown: View {
             if let hint {
                 HintRow(
                     text: hintText(hint),
-                    dismissLabel: Copy.hintDismiss.text(tone),
+                    dismissLabel: hintButton(hint),
                     onDismiss: onDismissHint)
                 KohaiSeparator()
             }
@@ -103,7 +105,13 @@ struct KohaiDropdown: View {
         switch hint {
         case .firstRun: return Copy.firstRunHint.text(tone)
         case .overflow: return Copy.overflowHint.text(tone)
+        case .accountsPending(let n): return Copy.hintAccountsPending.text(tone, ["n": "\(n)"])
         }
+    }
+
+    private func hintButton(_ hint: KohaiHint) -> String {
+        if case .accountsPending = hint { return Copy.hintConnect.text(tone) }
+        return Copy.hintDismiss.text(tone)
     }
 
     // MARK: List

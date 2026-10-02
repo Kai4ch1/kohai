@@ -184,6 +184,72 @@ enum Copy {
         key: "app.quit",
         polite: "Quit Kohai",
         serious: "Quit Kohai")
+    // MARK: Connect agents
+    static let connectTitle = CopyEntry(
+        key: "connect.title",
+        polite: "May I listen to your agents?",
+        serious: "Connect your agents")
+    static let connectBody = CopyEntry(
+        key: "connect.body",
+        polite: "I'll add one small hook to each folder you pick. Nothing else changes, and a backup is kept.",
+        serious: "Kohai adds a hook entry to each selected config. Nothing else changes; a backup is kept.")
+    static let connectAction = CopyEntry(
+        key: "connect.action",
+        polite: "Connect {n}",
+        serious: "Connect {n}")
+    static let connectDone = CopyEntry(
+        key: "connect.done",
+        polite: "Done",
+        serious: "Done")
+    static let connectAddFolder = CopyEntry(
+        key: "connect.addFolder",
+        polite: "Add a folder…",
+        serious: "Add folder…")
+    static let connectNoneFound = CopyEntry(
+        key: "connect.noneFound",
+        polite: "I couldn't find Claude Code or Codex here. Point me to a config folder?",
+        serious: "No Claude Code or Codex config folders found.")
+    static let connectRestart = CopyEntry(
+        key: "connect.restart",
+        polite: "Connected. Please restart running sessions so they report to me.",
+        serious: "Connected. Restart running sessions to see them here.")
+    static let connectFailed = CopyEntry(
+        key: "connect.failed",
+        polite: "I couldn't change {file}: {reason}",
+        serious: "Could not update {file}: {reason}")
+    static let accountConnected = CopyEntry(
+        key: "account.connected",
+        polite: "Connected",
+        serious: "Connected")
+    static let accountNotConnected = CopyEntry(
+        key: "account.notConnected",
+        polite: "Not connected",
+        serious: "Not connected")
+    static let accountNeedsUpdate = CopyEntry(
+        key: "account.needsUpdate",
+        polite: "Needs updating",
+        serious: "Needs update")
+    static let accountUnreadable = CopyEntry(
+        key: "account.unreadable",
+        polite: "I can't read its settings ({reason}), so I won't touch it",
+        serious: "Settings unreadable ({reason}); left unchanged")
+    static let accountDisconnect = CopyEntry(
+        key: "account.disconnect",
+        polite: "Disconnect",
+        serious: "Disconnect")
+    static let hintAccountsPending = CopyEntry(
+        key: "hint.accountsPending",
+        polite: "{n} not connected yet.",
+        serious: "{n} not connected.")
+    static let hintConnect = CopyEntry(
+        key: "hint.connect",
+        polite: "Connect",
+        serious: "Connect")
+    static let footerAgents = CopyEntry(
+        key: "footer.agents",
+        polite: "Agents…",
+        serious: "Agents…")
+
     static let menuBarNone = CopyEntry(
         key: "menubar.a11y.none",
         polite: "Kohai, nobody needs you",
@@ -212,6 +278,10 @@ enum Copy {
         automationTitle, automationBody, automationAction,
         firstRunHint, overflowHint, hintDismiss,
         clearSession, quit,
+        connectTitle, connectBody, connectAction, connectDone, connectAddFolder, connectNoneFound,
+        connectRestart, connectFailed,
+        accountConnected, accountNotConnected, accountNeedsUpdate, accountUnreadable, accountDisconnect,
+        hintAccountsPending, hintConnect, footerAgents,
         menuBarNone, menuBarSome,
     ]
 }

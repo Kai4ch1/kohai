@@ -40,3 +40,19 @@ are identical in both variants. Tone is chosen by the `kohaiCopyTone` environmen
 | `menubar.a11y.none` | Kohai, nobody needs you | Kohai, no sessions need input |
 | `menubar.a11y.some` | Kohai, {n} need you | Kohai, {n} sessions need input |
 | `socket.pathLabel` | Socket | Socket |
+| `connect.title` | May I listen to your agents? | Connect your agents |
+| `connect.body` | I'll add one small hook to each folder you pick. Nothing else changes, and a backup is kept. | Kohai adds a hook entry to each selected config. Nothing else changes; a backup is kept. |
+| `connect.action` | Connect {n} | Connect {n} |
+| `connect.done` | Done | Done |
+| `connect.addFolder` | Add a folder… | Add folder… |
+| `connect.noneFound` | I couldn't find Claude Code or Codex here. Point me to a config folder? | No Claude Code or Codex config folders found. |
+| `connect.restart` | Connected. Please restart running sessions so they report to me. | Connected. Restart running sessions to see them here. |
+| `connect.failed` | I couldn't change {file}: {reason} | Could not update {file}: {reason} |
+| `account.connected` | Connected | Connected |
+| `account.notConnected` | Not connected | Not connected |
+| `account.needsUpdate` | Needs updating | Needs update |
+| `account.unreadable` | I can't read its settings ({reason}), so I won't touch it | Settings unreadable ({reason}); left unchanged |
+| `account.disconnect` | Disconnect | Disconnect |
+| `hint.accountsPending` | {n} not connected yet. | {n} not connected. |
+| `hint.connect` | Connect | Connect |
+| `footer.agents` | Agents… | Agents… |

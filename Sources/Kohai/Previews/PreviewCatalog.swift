@@ -118,10 +118,41 @@ enum PreviewCatalog {
         AnyView(PreviewStage(tone: .serious) { KohaiStateDropdown(kind: .hooksNotInstalled) })
     }
 
+    static let connectFirstRun = PreviewEntry(id: "18-connect-first-run", title: "Connect agents, first run") { _ in
+        AnyView(PreviewStage { ConnectAgentsDropdown(accounts: PreviewData.accountsFirstRun) })
+    }
+
+    static let connectMixed = PreviewEntry(id: "19-connect-mixed", title: "Connect agents, every account state") { _ in
+        AnyView(PreviewStage {
+            ConnectAgentsDropdown(
+                accounts: PreviewData.accountsMixed,
+                notice: Copy.connectRestart.text(.polite),
+                onDone: {})
+        })
+    }
+
+    static let connectNoneFound = PreviewEntry(id: "20-connect-none-found", title: "Connect agents, nothing found") { _ in
+        AnyView(PreviewStage { ConnectAgentsDropdown(accounts: [], onDone: {}) })
+    }
+
+    static let connectSerious = PreviewEntry(id: "21-connect-serious-mode", title: "Connect agents, serious mode copy") { _ in
+        AnyView(PreviewStage(tone: .serious) { ConnectAgentsDropdown(accounts: PreviewData.accountsMixed, onDone: {}) })
+    }
+
+    static let mainPendingHint = PreviewEntry(id: "22-main-accounts-pending", title: "Dropdown with not-connected hint and footer") { snap in
+        AnyView(PreviewStage {
+            VStack(spacing: 0) {
+                KohaiDropdown(sessions: PreviewData.mixed, hint: .accountsPending(1), scrollable: !snap)
+                DropdownFooter()
+            }
+        })
+    }
+
     /// Required states first, then the extra accessibility / tone variants.
     static let all: [PreviewEntry] = [
         main, firstRunHint, empty, hooksNotInstalled, socketError, automationDenied,
         manySessions, longNames, unknownAgent, overflowHidden, menuBarIcon, mascotSheet,
         mainIncreasedContrast, mainLifted, mainSerious, emptySerious, hooksSerious,
+        connectFirstRun, connectMixed, connectNoneFound, connectSerious, mainPendingHint,
     ]
 }

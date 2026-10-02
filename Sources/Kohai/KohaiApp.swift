@@ -29,6 +29,14 @@ final class AppModel {
     @ObservationIgnored private var listener: SocketListener?
 
     let home = NSHomeDirectory()
+    let connections = AgentConnections()
+    /// Done was pressed on the connect screen: don't push it again until relaunch.
+    var onboardingDismissed = false
+
+    /// Re-reads agent accounts; accounts that live sessions report from are always included.
+    func refreshConnections() {
+        connections.refresh(seen: store.sessions.values.map { AgentAccount(agent: $0.agent, configDir: $0.configDir) })
+    }
 
     /// Returns false when another Kohai already owns the socket.
     func start() -> Bool {
@@ -97,6 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !model.start() {
             NSApp.terminate(nil) // another instance is running
         }
+        model.refreshConnections()
     }
 
     func applicationWillTerminate(_ notification: Notification) {

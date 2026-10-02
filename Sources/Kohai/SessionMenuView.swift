@@ -44,17 +44,29 @@ private enum MenuBarImages {
 struct SessionMenuView: View {
     let model: AppModel
 
+    /// The user opened the connect screen from the footer or the hint.
+    @State private var showingConnect = false
+
     @Environment(\.kohaiCopyTone) private var tone
+
+    private var connections: AgentConnections { model.connections }
 
     var body: some View {
         content
             .background {
-                // ⌘Q while the dropdown has focus; the design has no visible Quit control.
+                // ⌘Q while the dropdown has focus.
                 Button(Copy.quit.text(tone)) { NSApp.terminate(nil) }
                     .keyboardShortcut("q")
                     .hidden()
             }
+            .onAppear { model.refreshConnections() }
             .kohaiThemed()
+    }
+
+    /// First run: nothing connected yet and nothing to show, so ask instead of showing "All quiet".
+    private var needsOnboarding: Bool {
+        !model.onboardingDismissed && model.store.sessions.isEmpty
+            && !connections.hasConnectedAccount && connections.pendingCount > 0
     }
 
     @ViewBuilder
@@ -71,24 +83,88 @@ struct SessionMenuView: View {
                     NSWorkspace.shared.open(url)
                 }
             }
+        } else if showingConnect || needsOnboarding {
+            ConnectAgentsDropdown(
+                accounts: connections.accounts.map { AccountRowModel(account: $0, state: connections.states[$0.id], home: model.home) },
+                notice: noticeText,
+                onConnect: { ids in
+                    connections.connect(ids)
+                    showingConnect = true // stay to show the restart reminder
+                },
+                onDisconnect: { id in
+                    connections.disconnect(id)
+                    showingConnect = true
+                },
+                onAddFolder: {
+                    connections.addFolder()
+                    showingConnect = true
+                },
+                onDone: {
+                    connections.declinePending()
+                    model.onboardingDismissed = true
+                    showingConnect = false
+                })
+            // A fresh selection whenever the set of accounts or their states change.
+            .id(connections.accounts.map { "\($0.id)=\(String(describing: connections.states[$0.id]))" })
         } else if model.store.sessions.isEmpty {
-            KohaiStateDropdown(kind: .empty)
+            VStack(spacing: 0) {
+                KohaiStateDropdown(kind: .empty)
+                footer
+            }
         } else {
             // Rows show static "seconds in status", so re-map once a second.
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 let rows = model.store.sessions.values.map {
                     SessionRowModel(session: $0, now: context.date, home: model.home)
                 }
-                KohaiDropdown(
-                    sessions: rows,
-                    onJump: { row in
-                        if let key = SessionRowModel.key(forID: row.id) { model.jump(to: key) }
-                    },
-                    onClear: { row in
-                        if let key = SessionRowModel.key(forID: row.id) { model.clear(key) }
-                    })
+                VStack(spacing: 0) {
+                    KohaiDropdown(
+                        sessions: rows,
+                        hint: connections.pendingCount > 0 ? .accountsPending(connections.pendingCount) : nil,
+                        onJump: { row in
+                            if let key = SessionRowModel.key(forID: row.id) { model.jump(to: key) }
+                        },
+                        onClear: { row in
+                            if let key = SessionRowModel.key(forID: row.id) { model.clear(key) }
+                        },
+                        onDismissHint: { showingConnect = true })
+                    footer
+                }
             }
         }
+    }
+
+    private var footer: some View {
+        DropdownFooter(onAgents: { showingConnect = true }, onQuit: { NSApp.terminate(nil) })
+    }
+
+    private var noticeText: String? {
+        switch connections.notice {
+        case nil:
+            return nil
+        case .connected:
+            return Copy.connectRestart.text(tone)
+        case .failed(let failures):
+            return failures
+                .map { Copy.connectFailed.text(tone, ["file": $0.file, "reason": $0.reason]) }
+                .joined(separator: "\n")
+        }
+    }
+}
+
+extension AccountRowModel {
+    init(account: AgentAccount, state: HookConnection?, home: String) {
+        let mapped: AccountConnectionState = switch state ?? .notConnected {
+        case .notConnected: .notConnected
+        case .connected: .connected
+        case .needsUpdate: .needsUpdate
+        case .unreadable(let reason): .unreadable(reason)
+        }
+        self.init(
+            id: account.id,
+            agent: AgentKind(account.agent),
+            path: abbreviateHome(account.configDir, home: home),
+            state: mapped)
     }
 }
 

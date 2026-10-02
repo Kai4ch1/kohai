@@ -19,3 +19,8 @@ import SwiftUI
 #Preview("15 Serious mode") { PreviewCatalog.mainSerious.make(false) }
 #Preview("16 Empty, serious") { PreviewCatalog.emptySerious.make(false) }
 #Preview("17 Hooks, serious") { PreviewCatalog.hooksSerious.make(false) }
+#Preview("18 Connect, first run") { PreviewCatalog.connectFirstRun.make(false) }
+#Preview("19 Connect, mixed") { PreviewCatalog.connectMixed.make(false) }
+#Preview("20 Connect, none found") { PreviewCatalog.connectNoneFound.make(false) }
+#Preview("21 Connect, serious") { PreviewCatalog.connectSerious.make(false) }
+#Preview("22 Accounts pending hint") { PreviewCatalog.mainPendingHint.make(false) }
