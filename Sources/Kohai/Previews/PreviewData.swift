@@ -77,4 +77,21 @@ enum PreviewData {
         }
         return items
     }()
+
+    /// First run on a Mac with two Claude accounts and Codex, nothing connected yet.
+    static let accountsFirstRun: [AccountRowModel] = [
+        AccountRowModel(id: "claude:~/.claude", agent: .claudeCode, path: "~/.claude", state: .notConnected),
+        AccountRowModel(id: "claude:~/.claude-work", agent: .claudeCode, path: "~/.claude-work", state: .notConnected),
+        AccountRowModel(id: "codex:~/.codex", agent: .codex, path: "~/.codex", state: .notConnected),
+    ]
+
+    /// Every row state at once.
+    static let accountsMixed: [AccountRowModel] = [
+        AccountRowModel(id: "claude:~/.claude", agent: .claudeCode, path: "~/.claude", state: .connected),
+        AccountRowModel(id: "claude:~/.claude-work", agent: .claudeCode, path: "~/.claude-work", state: .needsUpdate),
+        AccountRowModel(id: "codex:~/.codex", agent: .codex, path: "~/.codex", state: .notConnected),
+        AccountRowModel(
+            id: "claude:~/clients/acme/.claude", agent: .claudeCode,
+            path: "~/clients/acme-corporation-long-folder-name/.claude", state: .unreadable("not valid JSON")),
+    ]
 }

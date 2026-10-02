@@ -52,6 +52,16 @@ open build/Kohai.app
 
 Quit from the menu (⌘Q in the popover). SIGTERM/SIGINT/SIGHUP also quit cleanly. The socket file is removed on quit.
 
+## Connecting agents
+
+On first launch Kohai lists the agent config folders it finds in your home folder (`~/.claude`,
+`~/.claude-*`, `~/.codex`, `~/.codex-*`) and asks which ones to connect. Nothing is written until you click
+**Connect**. For each selected folder it adds one `kohai-hook` entry per event to `settings.json` (Claude Code)
+or `hooks.json` (Codex), keeps everything else, and saves the previous file as `<file>.kohai-backup`.
+**Agents…** in the dropdown footer reopens the list: connect more, **Disconnect** (removes only Kohai's
+entries), or **Add a folder…** for a config dir elsewhere. If the app moves, accounts show *Needs update*.
+Running sessions must be restarted to pick up new hooks.
+
 ## Manual acceptance test (never touches ~/.claude)
 
 ```sh
