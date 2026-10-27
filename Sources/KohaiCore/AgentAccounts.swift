@@ -80,7 +80,10 @@ public enum HookConfig {
     public static func events(for agent: Agent) -> [String] {
         switch agent {
         case .claude:
-            ["SessionStart", "UserPromptSubmit", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop", "SessionEnd"]
+            // SubagentStart/SubagentStop feed the agent map. Adding events turns existing
+            // installs into `.needsUpdate`, so the user reconnects once.
+            ["SessionStart", "UserPromptSubmit", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop",
+             "SessionEnd", "SubagentStart", "SubagentStop"]
         case .codex:
             // Codex has no PostToolUseFailure.
             ["SessionStart", "UserPromptSubmit", "PermissionRequest", "PostToolUse", "Stop", "SessionEnd"]

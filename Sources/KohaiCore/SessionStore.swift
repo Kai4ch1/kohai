@@ -45,6 +45,8 @@ public struct Session: Sendable, Equatable, Identifiable {
     public var message: String?
     /// Tool keys of permission requests not yet followed by a matching tool result.
     public var pendingPermissions: Set<String>
+    /// Main transcript reported by the hooks; where the agent map reads subagents from.
+    public var transcriptPath: String? = nil
 
     public var id: SessionKey { key }
     public var agent: Agent { key.agent }
@@ -118,7 +120,9 @@ public struct SessionStore: Sendable {
         session.configDir = event.configDir
         session.terminal = event.terminal
         session.lastEventAt = event.timestamp
-        if let message = event.message { session.message = message }
+        // A subagent's last message is not the session's.
+        if let message = event.message, event.kind != .subagentStop { session.message = message }
+        if let path = event.transcriptPath { session.transcriptPath = path }
 
         var status = session.status
         switch event.kind {
@@ -138,6 +142,12 @@ public struct SessionStore: Sendable {
         case .stop:
             session.pendingPermissions.removeAll()
             status = .done
+        case .subagentStart:
+            // Subagents never change the session's own status; a session first seen through
+            // one is evidently busy.
+            if isNew { status = .working }
+        case .subagentStop:
+            break
         case .sessionEnd:
             break // handled above
         }
