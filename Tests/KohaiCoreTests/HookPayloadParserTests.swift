@@ -53,7 +53,7 @@ struct ClaudeFixtureTests {
         #expect(event.timestamp == now)
     }
 
-    @Test(arguments: ["PreToolUse", "SubagentStop", "Notification-permission_prompt", "Notification-idle_prompt"])
+    @Test(arguments: ["PreToolUse", "Notification-permission_prompt", "Notification-idle_prompt"])
     func ignoresUnusedEvents(name: String) throws {
         let result = HookPayloadParser.parse(try fixture("claude", name), agent: .claude, environment: claudeEnv, terminal: terminal, now: now)
         guard case .ignored = result else {
@@ -228,5 +228,64 @@ struct WireCodecTests {
     @Test func rejectsGarbage() {
         #expect(throws: (any Error).self) { try WireCodec.decode(Data("{\"agent\":\"vim\"}".utf8)) }
         #expect(throws: (any Error).self) { try WireCodec.decode(Data([0x00, 0x01])) }
+    }
+}
+
+@Suite("Subagent hooks")
+struct SubagentHookTests {
+    /// Built from the SubagentStart shape in the Claude Code 2.1.311 bundle (not live-captured).
+    @Test func subagentStart() throws {
+        let event = try parseEvent(try fixture("claude", "SubagentStart"))
+        #expect(event.kind == .subagentStart)
+        #expect(event.agentID == "a5f0c2e9b7d14a3c8")
+        #expect(event.agentType == "general-purpose")
+        #expect(event.message == nil)
+        #expect(event.transcriptPath == "/Users/tester/.claude-work/projects/-Users-tester-dev-kohai-demo/dff5891b-76a1-482f-9357-a38ebac4e571.jsonl")
+    }
+
+    /// Captured from CLI 2.1.286: an internal agent with an empty agent_type.
+    @Test func subagentStop() throws {
+        let event = try parseEvent(try fixture("claude", "SubagentStop"))
+        #expect(event.kind == .subagentStop)
+        #expect(event.agentID == "a09117be49d0f5fa0")
+        #expect(event.agentType == nil)
+        #expect(event.message == "ls kohai-perm-test.txt")
+        #expect(event.configDir == "/Users/tester/.claude-work")
+    }
+
+    @Test func subagentEventsNeedAnAgentID() {
+        for name in ["SubagentStart", "SubagentStop"] {
+            let result = parse("{\"hook_event_name\": \"\(name)\", \"session_id\": \"s\", \"cwd\": \"/x\"}")
+            #expect(result == .invalid("missing agent_id"))
+            let empty = parse("{\"hook_event_name\": \"\(name)\", \"session_id\": \"s\", \"cwd\": \"/x\", \"agent_id\": \"\"}")
+            #expect(empty == .invalid("missing agent_id"))
+        }
+    }
+
+    @Test func toolEventsInsideASubagentCarryItsID() throws {
+        let result = parse("""
+        {"hook_event_name": "PermissionRequest", "session_id": "s", "cwd": "/x", "agent_id": "a1", "agent_type": "Explore",
+         "tool_name": "Bash", "tool_input": {"command": "ls"}}
+        """)
+        guard case .event(let event) = result else {
+            Issue.record("expected event, got \(result)")
+            return
+        }
+        #expect(event.kind == .permissionRequest)
+        #expect(event.agentID == "a1")
+        #expect(event.agentType == "Explore")
+    }
+
+    @Test func mainSessionEventsHaveNoAgentID() throws {
+        let event = try parseEvent(try fixture("claude", "PermissionRequest"))
+        #expect(event.agentID == nil)
+        #expect(event.transcriptPath != nil)
+    }
+
+    @Test func oldEventsWithoutNewFieldsStillDecode() throws {
+        let old = Data(#"{"agent":"claude","kind":"stop","sessionID":"s","projectDir":"/p","cwd":"/p","configDir":"/c","terminal":{},"timestamp":1790000000}"#.utf8)
+        let event = try WireCodec.decode(old)
+        #expect(event.agentID == nil)
+        #expect(event.transcriptPath == nil)
     }
 }

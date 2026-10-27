@@ -90,6 +90,7 @@ struct SessionRow: View {
             let name = Copy.unknownAgent.text(tone)
             parts.append(raw.isEmpty ? name : "\(name) (\(raw))")
         }
+        if let agents = session.agentsLabel { parts.append(agents) }
         return parts.joined(separator: " · ")
     }
 
@@ -115,6 +116,10 @@ struct SessionRow: View {
 struct ProjectHeader: View {
     let project: String
     let count: Int
+    /// Opens the project's agent map (main window only).
+    var onShowMap: (() -> Void)? = nil
+
+    @Environment(\.kohaiCopyTone) private var tone
 
     @Environment(\.kohaiPalette) private var palette
 
@@ -126,6 +131,16 @@ struct ProjectHeader: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer(minLength: KohaiSpacing.sm)
+            if let onShowMap {
+                Button(action: onShowMap) {
+                    Image(systemName: "point.3.connected.trianglepath.dotted")
+                        .font(KohaiType.secondary)
+                        .foregroundStyle(palette.text.secondary.color)
+                }
+                .buttonStyle(.borderless)
+                .help(Copy.mapOpen.text(tone, ["project": project]))
+                .accessibilityLabel(Copy.mapOpen.text(tone, ["project": project]))
+            }
             Text("\(count)")
                 .font(KohaiType.mono)
                 .foregroundStyle(palette.text.tertiary.color)
@@ -133,7 +148,7 @@ struct ProjectHeader: View {
         .padding(.horizontal, KohaiSpacing.md)
         .padding(.top, KohaiSpacing.md)
         .padding(.bottom, KohaiSpacing.xs)
-        .accessibilityElement(children: .ignore)
+        .accessibilityElement(children: .contain)
         .accessibilityLabel("\(project), \(count)")
         .accessibilityAddTraits(.isHeader)
         .help(project)

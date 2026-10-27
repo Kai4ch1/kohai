@@ -173,7 +173,7 @@ extension SessionRowModel {
 
     /// Hooks carry no session title. Use the working directory when the agent runs in a
     /// subfolder of the project, otherwise a short session id.
-    private static func name(for session: Session) -> String {
+    static func name(for session: Session) -> String {
         let prefix = session.projectDir.hasSuffix("/") ? session.projectDir : session.projectDir + "/"
         if session.cwd.hasPrefix(prefix) {
             return String(session.cwd.dropFirst(prefix.count))

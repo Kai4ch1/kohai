@@ -319,3 +319,62 @@ struct GroupingTests {
         #expect(abbreviateHome("/opt/cfg", home: "/Users/me/") == "/opt/cfg")
     }
 }
+
+@Suite("Subagent events")
+struct SubagentEventTests {
+    private func subagent(_ kind: EventKind, at seconds: TimeInterval, message: String? = nil) -> AgentEvent {
+        var e = event(kind, at: seconds, message: message)
+        e.agentID = "a1"
+        e.agentType = "general-purpose"
+        return e
+    }
+
+    @Test(arguments: [SessionStatus.working, .needsInput, .done])
+    func neverChangeTheSessionStatus(from start: SessionStatus) {
+        var store = SessionStore()
+        switch start {
+        case .working: store.apply(event(.promptSubmit, at: 1))
+        case .needsInput: store.apply(event(.permissionRequest, at: 1, toolKey: "k"))
+        case .done: store.apply(event(.stop, at: 1))
+        }
+        store.apply(subagent(.subagentStart, at: 2))
+        #expect(status(store) == start)
+        store.apply(subagent(.subagentStop, at: 3, message: "child report"))
+        #expect(status(store) == start)
+    }
+
+    @Test func subagentStopMessageIsNotTheSessionMessage() {
+        var store = SessionStore()
+        store.apply(event(.promptSubmit, at: 1, message: "main prompt"))
+        store.apply(subagent(.subagentStop, at: 2, message: "child report"))
+        #expect(store.sessions.values.first?.message == "main prompt")
+    }
+
+    @Test func sessionFirstSeenThroughASubagentIsWorking() {
+        var store = SessionStore()
+        store.apply(subagent(.subagentStart, at: 1))
+        #expect(status(store) == .working)
+    }
+
+    @Test func transcriptPathIsKeptFromTheLatestEventThatHasOne() {
+        var store = SessionStore()
+        var first = event(.sessionStart, at: 1)
+        first.transcriptPath = "/c/projects/p/s1.jsonl"
+        store.apply(first)
+        store.apply(event(.promptSubmit, at: 2)) // no path: keep the known one
+        #expect(store.sessions.values.first?.transcriptPath == "/c/projects/p/s1.jsonl")
+    }
+
+    @Test func permissionInsideASubagentBlocksTheSession() {
+        var store = SessionStore()
+        store.apply(event(.promptSubmit, at: 1))
+        var request = subagent(.permissionRequest, at: 2)
+        request.toolKey = "k"
+        store.apply(request)
+        #expect(status(store) == .needsInput)
+        var finished = subagent(.toolFinished, at: 3)
+        finished.toolKey = "k"
+        store.apply(finished)
+        #expect(status(store) == .working)
+    }
+}

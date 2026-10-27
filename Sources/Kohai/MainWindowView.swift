@@ -9,6 +9,8 @@ struct MainWindowView: View {
     @State private var space: SpaceSelection = .all
     @State private var selectedSession: SessionRowModel.ID?
     @State private var editing: SpaceEditorTarget?
+    /// Project whose agent map replaces the detail column; nil = session detail.
+    @State private var mapProject: String?
 
     @Environment(\.openWindow) private var openWindow
     @Environment(\.controlActiveState) private var activeState
@@ -33,15 +35,24 @@ struct MainWindowView: View {
                     title: title(for: space),
                     sessions: rows(in: space, classified),
                     selection: $selectedSession,
-                    onJump: { row in jump(row.id) })
+                    onJump: { row in jump(row.id) },
+                    onShowMap: { mapProject = $0 })
                 .navigationSplitViewColumnWidth(min: KohaiMetrics.sessionColumnWidth, ideal: KohaiMetrics.sessionColumnWidth)
             } detail: {
-                SessionDetail(
-                    model: detail(classified),
-                    onJump: { selectedSession.map(jump) },
-                    onClear: {
-                        if let id = selectedSession, let key = SessionRowModel.key(forID: id) { model.clear(key) }
-                    })
+                if let project = mapProject {
+                    AgentMapContainer(
+                        model: model,
+                        project: project,
+                        sessions: classified.map(\.session).filter { $0.projectName == project },
+                        onShowSessions: { mapProject = nil })
+                } else {
+                    SessionDetail(
+                        model: detail(classified),
+                        onJump: { selectedSession.map(jump) },
+                        onClear: {
+                            if let id = selectedSession, let key = SessionRowModel.key(forID: id) { model.clear(key) }
+                        })
+                }
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) { banner }
@@ -53,7 +64,11 @@ struct MainWindowView: View {
             model.openMainWindow = { [openWindow] in openWindow(id: KohaiApp.mainWindowID) }
             updateFocus()
         }
-        .onChange(of: selectedSession) { updateFocus() }
+        .onChange(of: selectedSession) {
+            // Picking a session shows its detail again.
+            if selectedSession != nil { mapProject = nil }
+            updateFocus()
+        }
         .onChange(of: activeState) { updateFocus() }
         .onDisappear { model.focusedSession = nil }
         .kohaiThemed()
@@ -69,13 +84,21 @@ struct MainWindowView: View {
 
     private func classify(now: Date) -> [Classified] {
         model.store.sessions.values.map { session in
-            Classified(
-                session: session,
-                row: SessionRowModel(
-                    session: session, now: now, home: model.home,
-                    label: settings.label(forConfigDir: session.configDir)),
-                space: model.spaceID(for: session))
+            var row = SessionRowModel(
+                session: session, now: now, home: model.home,
+                label: settings.label(forConfigDir: session.configDir))
+            row.agentsLabel = agentsLabel(for: session.key)
+            return Classified(session: session, row: row, space: model.spaceID(for: session))
         }
+    }
+
+    private func agentsLabel(for key: SessionKey) -> String? {
+        let summary = model.agentMap.graph.summary(of: key)
+        guard summary.total > 0 else { return nil }
+        if summary.needsInput > 0 {
+            return Copy.rowAgentsWaiting.text(tone, ["n": "\(summary.total)", "w": "\(summary.needsInput)"])
+        }
+        return Copy.rowAgents.text(tone, ["n": "\(summary.total)"])
     }
 
     private func rows(in selection: SpaceSelection, _ all: [Classified]) -> [SessionRowModel] {

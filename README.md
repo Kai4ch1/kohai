@@ -22,10 +22,36 @@ claude / codex ──hook──▶ kohai-hook <agent> ──Unix socket──▶
 | PostToolUse / PostToolUseFailure | remove the matching pending permission; none left → **working** |
 | Stop | → **done** |
 | SessionEnd / Clear button | remove |
-| anything else (Notification, SubagentStop, …) | ignored |
+| SubagentStart / SubagentStop | no session change; feeds the agent map |
+| anything else (Notification, PreToolUse, …) | ignored |
 
 `PermissionRequest` is used instead of `Notification`: it fires ~0.1 s after the dialog appears, `Notification(permission_prompt)` ~6 s later.
 Events are ordered by the hook's timestamp; late or duplicate events are dropped.
+
+## Agent map
+
+Each project header in the main window has a map button. It replaces the detail column with the project's
+**agent map**: every session of the project as a tree (main session → subagents → nested subagents), and an
+inspector for the selected agent with three tabs: **Steps** (prompt, tool calls, messages, hand-back: one-line
+summaries, never full tool input or output, no thinking), **Live output** (latest assistant text) and **Result**.
+**Sessions** in the header goes back.
+
+Where the data comes from (all read-only, nothing is written or stored):
+
+- Hooks, always: `SubagentStart` / `SubagentStop` create and finish nodes instantly; a `PermissionRequest`
+  fired inside a subagent carries its `agent_id`, so *that* agent shows **needs input**. Session rows show
+  "3 agents · 1 waiting".
+- Transcripts, only while a map is open (polled every 0.5 s, new bytes only):
+  `<configDir>/projects/<project>/<sessionId>.jsonl` and `<sessionId>/subagents/agent-<id>.jsonl` + `.meta.json`.
+  Parent → child comes from the parent's `Agent` tool call (`tool_use.id` = `meta.json` `toolUseId`, result
+  `toolUseResult.agentId` = file name). Finish comes from the hand-back, the parent's `<task-notification>`
+  (completed / failed / killed / blocked) or `SubagentStop`.
+- Reports: `reports/<agentType>-<task>.md` in the project, written while the agent ran (until 60 s after it
+  ended), becomes its result (beats the hand-back, which beats the last message).
+
+The transcript format is undocumented. Fixtures in `Tests/KohaiCoreTests/Fixtures/transcripts` are hand-written
+and mirror the record structure of Claude Code 2.1.311 (ids, times and text are made up); unknown record types
+are ignored.
 
 ## Layout
 
@@ -62,6 +88,9 @@ or `hooks.json` (Codex), keeps everything else, and saves the previous file as `
 entries), or **Add a folder…** for a config dir elsewhere. If the app moves, accounts show *Needs update*.
 Running sessions must be restarted to pick up new hooks.
 
+Claude Code accounts connected before the agent map existed show *Needs update* (two new events,
+`SubagentStart` and `SubagentStop`): reconnect them once in **Agents…**.
+
 ## Manual acceptance test (never touches ~/.claude)
 
 ```sh
@@ -71,7 +100,7 @@ python3 - "$KOHAI_CFG/settings.json" "$HOOK" <<'EOF'
 import json, sys
 path, hook = sys.argv[1], sys.argv[2]
 entry = lambda: [{"hooks": [{"type": "command", "command": hook, "args": ["claude"], "timeout": 1}]}]
-events = ["SessionStart", "UserPromptSubmit", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop", "SessionEnd"]
+events = ["SessionStart", "UserPromptSubmit", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop", "SessionEnd", "SubagentStart", "SubagentStop"]
 json.dump({"hooks": {e: entry() for e in events}}, open(path, "w"), indent=2)
 EOF
 cat "$KOHAI_CFG/settings.json"
@@ -93,6 +122,11 @@ Then, with `build/Kohai.app` running:
 Codex (not part of the M1 acceptance): same entries in `$CODEX_HOME/hooks.json` with `"command": "/path/to/kohai-hook codex"`;
 Codex asks you to trust the hooks once.
 
+Agent map check (same test config): ask a session *"Use two subagents in parallel: one lists the files in this
+folder, one counts the lines in README.md. Then summarize."* Open the project's map: the main session with two
+children appears, steps fill in live, both end **Done** with a result. Ask for a subagent that runs a command
+needing approval: that node (not just the session) turns **Needs input**.
+
 ## Known limitations (M1)
 
 - Esc at a permission prompt fires no hook: the row stays **Needs input** until the next prompt, Stop, or Clear.
@@ -104,3 +138,15 @@ Codex asks you to trust the hooks once.
 - tmux: the captured TTY is the pane's, not the terminal tab's (matters for tab focusing later).
 - After a crash or SIGKILL the socket file stays; the next launch removes it.
 - If you hide Kohai via System Settings › Menu Bar, there is no other way to reach it.
+
+## Known limitations (agent map)
+
+- The transcript format is undocumented and changes between versions (2.1.286 → 2.1.311 already did). Verified
+  on Linux transcripts only; not yet against real `~/.claude-work` / `~/.claude-personal` on macOS.
+- Not verified: compaction, `/clear`, `--resume` effects on transcript files; nested subagents' folder layout;
+  `failed` / `killed` / `blocked` notifications (seen only in the CLI bundle).
+- Reports are matched by agent type and time window: two agents of the same type running at the same time can
+  get each other's report.
+- Transcripts are read only while a map is open (0.5 s polling); without connected hooks, statuses come only
+  from transcripts and **needs input** inside a subagent is not visible.
+- At most 500 steps per agent are kept in memory; long lines (> 2 MB) are skipped.

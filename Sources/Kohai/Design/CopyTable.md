@@ -120,3 +120,34 @@ are identical in both variants. Tone is chosen by the `kohaiCopyTone` environmen
 | `accounts.help` | Give each config folder a name and color so you can tell them apart. | Name and color each agent config folder. |
 | `accounts.namePlaceholder` | Name | Name |
 | `accounts.unnamed` | unnamed | unnamed |
+| `map.toggle.sessions` | Sessions | Sessions |
+| `map.toggle.map` | Agent map | Agent map |
+| `map.open` | Show who's helping on {project} | Show agent map for {project} |
+| `map.empty.title` | No helpers called in yet | No subagents yet |
+| `map.empty.body` | When a session hands work to subagents, they show up here, senpai. | Subagents launched by these sessions appear here. |
+| `map.noSessions` | Nobody's at a desk on this project | No sessions in this project |
+| `map.main` | Main session | Main session |
+| `map.selectHint` | Pick someone to see what they did | Select an agent to see its steps |
+| `map.background` | in the background | background |
+| `inspector.steps` | Steps | Steps |
+| `inspector.live` | Right now | Live output |
+| `inspector.result` | Result | Result |
+| `inspector.noSteps` | Nothing yet | No steps yet |
+| `inspector.noLive` | No words from them yet | No output yet |
+| `inspector.noResult` | Still on it, no result yet | No result yet |
+| `inspector.earlier` | {n} earlier steps not shown | {n} earlier steps not shown |
+| `result.fromReport` | From their report {file} | From report {file} |
+| `result.fromHandback` | Their hand-back | Hand-back |
+| `result.fromMessage` | Their last message | Last message |
+| `result.openReport` | Open report | Open report |
+| `step.prompt` | Task | Prompt |
+| `step.message` | Said | Message |
+| `step.handback` | Handed back | Hand-back |
+| `step.waiting` | waiting | pending |
+| `agent.status.running` | Working on it | Running |
+| `agent.status.needsInput` | Needs your approval | Needs input |
+| `agent.status.done` | Finished | Done |
+| `agent.status.error` | Ran into trouble | Failed |
+| `agent.status.interrupted` | Stopped | Interrupted |
+| `row.agents` | {n} helpers | {n} agents |
+| `row.agentsWaiting` | {n} helpers · {w} waiting | {n} agents · {w} waiting |

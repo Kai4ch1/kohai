@@ -21,6 +21,10 @@ public enum EventKind: String, Codable, Sendable, CaseIterable {
     case toolFinished
     case stop
     case sessionEnd
+    /// A subagent was launched (Claude Code SubagentStart). `agentID` names it.
+    case subagentStart
+    /// A subagent finished (Claude Code SubagentStop). `agentID` names it.
+    case subagentStop
 }
 
 /// Where the agent runs. Used by `TerminalJump` to focus the session's tab.
@@ -68,6 +72,12 @@ public struct AgentEvent: Codable, Sendable, Equatable {
     public var message: String?
     /// Hash of tool name + tool input, linking a permission request to its tool result.
     public var toolKey: String?
+    /// The subagent this event comes from (hook `agent_id`); nil for the main session.
+    public var agentID: String?
+    /// Hook `agent_type`, e.g. "general-purpose".
+    public var agentType: String?
+    /// The main session's transcript (hook `transcript_path`). Used to find subagent transcripts.
+    public var transcriptPath: String?
 
     public init(
         agent: Agent,
@@ -79,7 +89,10 @@ public struct AgentEvent: Codable, Sendable, Equatable {
         terminal: TerminalInfo,
         timestamp: Date,
         message: String? = nil,
-        toolKey: String? = nil
+        toolKey: String? = nil,
+        agentID: String? = nil,
+        agentType: String? = nil,
+        transcriptPath: String? = nil
     ) {
         self.agent = agent
         self.kind = kind
@@ -91,6 +104,9 @@ public struct AgentEvent: Codable, Sendable, Equatable {
         self.timestamp = timestamp
         self.message = message
         self.toolKey = toolKey
+        self.agentID = agentID
+        self.agentType = agentType
+        self.transcriptPath = transcriptPath
     }
 }
 

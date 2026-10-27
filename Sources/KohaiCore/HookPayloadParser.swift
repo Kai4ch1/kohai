@@ -22,6 +22,8 @@ public enum HookPayloadParser {
         "PostToolUseFailure": .toolFinished,
         "Stop": .stop,
         "SessionEnd": .sessionEnd,
+        "SubagentStart": .subagentStart,
+        "SubagentStop": .subagentStop,
     ]
 
     public static func parse(
@@ -50,6 +52,12 @@ public enum HookPayloadParser {
             return .invalid("missing cwd")
         }
 
+        // Tool and permission hooks fired inside a subagent carry its agent_id too.
+        let agentID = nonEmptyString(payload["agent_id"])
+        if kind == .subagentStart || kind == .subagentStop, agentID == nil {
+            return .invalid("missing agent_id")
+        }
+
         var message: String?
         var toolKey: String?
         switch kind {
@@ -62,9 +70,9 @@ public enum HookPayloadParser {
         case .toolFinished:
             let toolName = payload["tool_name"] as? String ?? "tool"
             toolKey = makeToolKey(toolName: toolName, toolInput: payload["tool_input"])
-        case .stop:
+        case .stop, .subagentStop:
             message = (payload["last_assistant_message"] as? String).flatMap(normalizeMessage)
-        case .sessionStart, .sessionEnd:
+        case .sessionStart, .sessionEnd, .subagentStart:
             break
         }
 
@@ -85,8 +93,16 @@ public enum HookPayloadParser {
             terminal: terminal,
             timestamp: now,
             message: message,
-            toolKey: toolKey
+            toolKey: toolKey,
+            agentID: agentID,
+            agentType: nonEmptyString(payload["agent_type"]),
+            transcriptPath: nonEmptyString(payload["transcript_path"])
         ))
+    }
+
+    private static func nonEmptyString(_ value: Any?) -> String? {
+        guard let text = value as? String, !text.isEmpty else { return nil }
+        return text
     }
 
     /// The account is the config dir. For Claude it is read from

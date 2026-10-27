@@ -191,6 +191,33 @@ enum PreviewCatalog {
         })
     }
 
+    static let agentMap = PreviewEntry(id: "27-agent-map", title: "Agent map: master with three subagents, one waiting; finished agent's steps") { snapshot in
+        AnyView(PreviewStage {
+            AgentMapScreen(
+                project: "kohai", map: AgentMapPreviewData.map, inspector: AgentMapPreviewData.inspector,
+                selection: .constant("claude:s1/a2"), scrollable: !snapshot)
+                .frame(width: 720, height: 640)
+        })
+    }
+
+    static let agentMapResult = PreviewEntry(id: "28-agent-map-result", title: "Agent map: result from a report file, serious") { snapshot in
+        AnyView(PreviewStage(tone: .serious) {
+            AgentMapScreen(
+                project: "kohai", map: AgentMapPreviewData.map, inspector: AgentMapPreviewData.inspector,
+                selection: .constant("claude:s1/a2"), scrollable: !snapshot, inspectorTab: .result)
+                .frame(width: 720, height: 640)
+        })
+    }
+
+    static let agentMapEmpty = PreviewEntry(id: "29-agent-map-empty", title: "Agent map: session without subagents") { snapshot in
+        AnyView(PreviewStage {
+            AgentMapScreen(
+                project: "kohai", map: AgentMapPreviewData.lonely, inspector: nil,
+                selection: .constant(nil), scrollable: !snapshot)
+                .frame(width: 720, height: 520)
+        })
+    }
+
     /// Required states first, then the extra accessibility / tone variants.
     static let all: [PreviewEntry] = [
         main, firstRunHint, empty, hooksNotInstalled, socketError, automationDenied,
@@ -198,5 +225,52 @@ enum PreviewCatalog {
         mainIncreasedContrast, mainLifted, mainSerious, emptySerious, hooksSerious,
         connectFirstRun, connectMixed, connectNoneFound, connectSerious, mainPendingHint,
         mainWindow, mainWindowEmpty, mainWindowWarning, spaceEditor,
+        agentMap, agentMapResult, agentMapEmpty,
     ]
+}
+
+/// Sample agent map: a master that launched three subagents (one waiting for approval,
+/// one running in the background, one finished with a report).
+enum AgentMapPreviewData {
+    static let map = AgentMapPresentation(
+        nodes: [
+            AgentNodeModel(id: "claude:s1", name: "kohai", subtitle: "Main session · Work", state: .running,
+                           isMain: true, elapsed: "12:40", column: 1, level: 0),
+            AgentNodeModel(id: "claude:s1/a1", name: "Map transcript format", subtitle: "Explore", state: .needsInput,
+                           isMain: false, elapsed: "3:05", column: 0, level: 1),
+            AgentNodeModel(id: "claude:s1/a2", name: "Write parser tests", subtitle: "qa", state: .done,
+                           isMain: false, elapsed: "6:51", column: 1, level: 1),
+            AgentNodeModel(id: "claude:s1/a3", name: "Review socket code", subtitle: "reviewer · in the background",
+                           state: .running, isMain: false, elapsed: "1:12", column: 2, level: 1),
+        ],
+        edges: [
+            AgentEdgeModel(from: "claude:s1", to: "claude:s1/a1"),
+            AgentEdgeModel(from: "claude:s1", to: "claude:s1/a2"),
+            AgentEdgeModel(from: "claude:s1", to: "claude:s1/a3"),
+        ],
+        columns: 3, levels: 2)
+
+    static let lonely = AgentMapPresentation(
+        nodes: [AgentNodeModel(id: "claude:s1", name: "kohai", subtitle: "Main session · Personal", state: .done,
+                               isMain: true, elapsed: "0:42", column: 0, level: 0)],
+        edges: [], columns: 1, levels: 1)
+
+    static let inspector = AgentInspectorModel(
+        id: "claude:s1/a2", name: "Write parser tests", subtitle: "qa", state: .done, elapsed: "6:51",
+        steps: [
+            AgentStepModel(id: "1", time: "14:02:10", kind: .prompt, summary: "Cover malformed lines and task notifications",
+                           pending: false, isError: false, errorLine: nil),
+            AgentStepModel(id: "2", time: "14:02:31", kind: .tool("Read"), summary: "Sources/KohaiCore/Transcript.swift",
+                           pending: false, isError: false, errorLine: nil),
+            AgentStepModel(id: "3", time: "14:04:02", kind: .tool("Bash"), summary: "Run the core test suite",
+                           pending: false, isError: true, errorLine: "error: 2 tests failed"),
+            AgentStepModel(id: "4", time: "14:06:40", kind: .message, summary: "Fixed the timestamp parsing, all green now.",
+                           pending: false, isError: false, errorLine: nil),
+            AgentStepModel(id: "5", time: "14:08:59", kind: .handback, summary: "Added 14 tests; report in reports/qa-parser.md",
+                           pending: false, isError: false, errorLine: nil),
+        ],
+        earlierSteps: 0,
+        live: "Fixed the timestamp parsing, all green now.",
+        result: "# Parser tests\n\n14 new tests, all passing. Malformed lines, missing timestamps and unknown record types are ignored.",
+        resultSource: .report(fileName: "qa-parser.md", path: "/Users/me/dev/kohai/reports/qa-parser.md"))
 }
