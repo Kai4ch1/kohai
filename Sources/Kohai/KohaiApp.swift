@@ -37,6 +37,8 @@ final class AppModel {
     let home = NSHomeDirectory()
     let settings: SettingsModel
     let connections: AgentConnections
+    /// Subagents per session: hook events always, transcripts while a map is open.
+    let agentMap = AgentMapModel()
 
     init(settings: SettingsModel = SettingsModel()) {
         self.settings = settings
@@ -76,7 +78,10 @@ final class AppModel {
         // The model lives as long as the app, so the strong capture is intended.
         let listener = SocketListener(path: path) { data in
             guard let event = try? WireCodec.decode(data) else { return }
-            Task { @MainActor in self.store.apply(event) }
+            Task { @MainActor in
+                self.store.apply(event)
+                self.agentMap.apply(hook: event)
+            }
         }
         do {
             try listener.start()
@@ -98,6 +103,7 @@ final class AppModel {
 
     func clear(_ key: SessionKey) {
         store.clear(key, at: Date())
+        agentMap.remove(key)
     }
 
     func jump(to key: SessionKey) {

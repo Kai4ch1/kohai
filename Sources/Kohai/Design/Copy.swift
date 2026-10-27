@@ -517,6 +517,132 @@ enum Copy {
         polite: "Kohai, {n} need you",
         serious: "Kohai, {n} sessions need input")
 
+    // MARK: Agent map
+    static let mapToggleSessions = CopyEntry(
+        key: "map.toggle.sessions",
+        polite: "Sessions",
+        serious: "Sessions")
+    static let mapToggleMap = CopyEntry(
+        key: "map.toggle.map",
+        polite: "Agent map",
+        serious: "Agent map")
+    static let mapOpen = CopyEntry(
+        key: "map.open",
+        polite: "Show who's helping on {project}",
+        serious: "Show agent map for {project}")
+    static let mapEmptyTitle = CopyEntry(
+        key: "map.empty.title",
+        polite: "No helpers called in yet",
+        serious: "No subagents yet")
+    static let mapEmptyBody = CopyEntry(
+        key: "map.empty.body",
+        polite: "When a session hands work to subagents, they show up here, senpai.",
+        serious: "Subagents launched by these sessions appear here.")
+    static let mapNoSessions = CopyEntry(
+        key: "map.noSessions",
+        polite: "Nobody's at a desk on this project",
+        serious: "No sessions in this project")
+    static let mapMain = CopyEntry(
+        key: "map.main",
+        polite: "Main session",
+        serious: "Main session")
+    static let mapSelectHint = CopyEntry(
+        key: "map.selectHint",
+        polite: "Pick someone to see what they did",
+        serious: "Select an agent to see its steps")
+    static let mapBackground = CopyEntry(
+        key: "map.background",
+        polite: "in the background",
+        serious: "background")
+    static let inspectorSteps = CopyEntry(
+        key: "inspector.steps",
+        polite: "Steps",
+        serious: "Steps")
+    static let inspectorLive = CopyEntry(
+        key: "inspector.live",
+        polite: "Right now",
+        serious: "Live output")
+    static let inspectorResult = CopyEntry(
+        key: "inspector.result",
+        polite: "Result",
+        serious: "Result")
+    static let inspectorNoSteps = CopyEntry(
+        key: "inspector.noSteps",
+        polite: "Nothing yet",
+        serious: "No steps yet")
+    static let inspectorNoLive = CopyEntry(
+        key: "inspector.noLive",
+        polite: "No words from them yet",
+        serious: "No output yet")
+    static let inspectorNoResult = CopyEntry(
+        key: "inspector.noResult",
+        polite: "Still on it, no result yet",
+        serious: "No result yet")
+    static let inspectorEarlier = CopyEntry(
+        key: "inspector.earlier",
+        polite: "{n} earlier steps not shown",
+        serious: "{n} earlier steps not shown")
+    static let resultFromReport = CopyEntry(
+        key: "result.fromReport",
+        polite: "From their report {file}",
+        serious: "From report {file}")
+    static let resultFromHandback = CopyEntry(
+        key: "result.fromHandback",
+        polite: "Their hand-back",
+        serious: "Hand-back")
+    static let resultFromMessage = CopyEntry(
+        key: "result.fromMessage",
+        polite: "Their last message",
+        serious: "Last message")
+    static let resultOpenReport = CopyEntry(
+        key: "result.openReport",
+        polite: "Open report",
+        serious: "Open report")
+    static let stepPrompt = CopyEntry(
+        key: "step.prompt",
+        polite: "Task",
+        serious: "Prompt")
+    static let stepMessage = CopyEntry(
+        key: "step.message",
+        polite: "Said",
+        serious: "Message")
+    static let stepHandback = CopyEntry(
+        key: "step.handback",
+        polite: "Handed back",
+        serious: "Hand-back")
+    static let stepWaiting = CopyEntry(
+        key: "step.waiting",
+        polite: "waiting",
+        serious: "pending")
+    static let agentRunning = CopyEntry(
+        key: "agent.status.running",
+        polite: "Working on it",
+        serious: "Running")
+    static let agentNeedsInput = CopyEntry(
+        key: "agent.status.needsInput",
+        polite: "Needs your approval",
+        serious: "Needs input")
+    static let agentDone = CopyEntry(
+        key: "agent.status.done",
+        polite: "Finished",
+        serious: "Done")
+    static let agentError = CopyEntry(
+        key: "agent.status.error",
+        polite: "Ran into trouble",
+        serious: "Failed")
+    static let agentInterrupted = CopyEntry(
+        key: "agent.status.interrupted",
+        polite: "Stopped",
+        serious: "Interrupted")
+    static let rowAgents = CopyEntry(
+        key: "row.agents",
+        polite: "{n} helpers",
+        serious: "{n} agents")
+    static let rowAgentsWaiting = CopyEntry(
+        key: "row.agentsWaiting",
+        polite: "{n} helpers · {w} waiting",
+        serious: "{n} agents · {w} waiting")
+
     // MARK: Developer-facing placeholders (previews only)
     static let socketPathLabel = CopyEntry(
         key: "socket.pathLabel",
@@ -542,5 +668,6 @@ enum Copy {
         hintAccountsPending, hintConnect, footerAgents,
         windowTitle, sidebarAll, sidebarUnsorted, sidebarSpaces, sidebarNewSpace, spaceEdit, spaceMute, spaceUnmute, spaceMoveUp, spaceMoveDown, spaceMutedLabel, sessionsEmptyTitle, sessionsEmptyBody, detailEmpty, detailJump, detailClear, detailProject, detailFolder, detailRemote, detailNoRemote, detailAccount, detailSpace, detailTerminal, detailLastMessage, detailSelectHint, terminalClaudeApp, terminalUnknown, warningUnreadable, warningNewer, warningSaveFailed, warningShowFile, editorNewTitle, editorEditTitle, editorName, editorNamePlaceholder, editorColor, editorSymbol, editorRules, editorRulesHelp, editorNoRules, ruleAccount, ruleRemote, ruleFolder, ruleRemotePlaceholder, ruleChooseFolder, ruleAdd, ruleRemove, editorSave, editorCancel, editorDelete, editorDeleteHelp, settingsGeneral, settingsAccounts, notifyToggle, notifyHelp, notifyMutedSpaces, notifyNoSpaces, notifyDeniedTitle, notifyDeniedBody, notifyDeniedAction, notificationClaudeApp, accountsHelp, accountsNamePlaceholder, accountsUnnamed,
         menuBarNone, menuBarSome,
+        mapToggleSessions, mapToggleMap, mapOpen, mapEmptyTitle, mapEmptyBody, mapNoSessions, mapMain, mapSelectHint, mapBackground, inspectorSteps, inspectorLive, inspectorResult, inspectorNoSteps, inspectorNoLive, inspectorNoResult, inspectorEarlier, resultFromReport, resultFromHandback, resultFromMessage, resultOpenReport, stepPrompt, stepMessage, stepHandback, stepWaiting, agentRunning, agentNeedsInput, agentDone, agentError, agentInterrupted, rowAgents, rowAgentsWaiting,
     ]
 }

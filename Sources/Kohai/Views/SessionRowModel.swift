@@ -66,6 +66,8 @@ struct SessionRowModel: Identifiable, Hashable, Sendable {
     let lastMessage: String
     /// The account's color, when the user picked one.
     var accountTone: LabelTone? = nil
+    /// "3 agents · 1 waiting" when the session has subagents.
+    var agentsLabel: String? = nil
 }
 
 struct ProjectGroup: Identifiable, Hashable, Sendable {

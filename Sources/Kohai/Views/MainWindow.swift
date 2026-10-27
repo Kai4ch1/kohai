@@ -161,6 +161,8 @@ struct SessionColumn: View {
     let sessions: [SessionRowModel]
     @Binding var selection: SessionRowModel.ID?
     var onJump: (SessionRowModel) -> Void = { _ in }
+    /// Opens a project's agent map; nil hides the button (snapshots).
+    var onShowMap: ((String) -> Void)? = nil
     /// false = no ScrollView (PNG snapshots).
     var scrollable: Bool = true
 
@@ -214,7 +216,9 @@ struct SessionColumn: View {
     private var rows: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(groups) { group in
-                ProjectHeader(project: group.project, count: group.sessions.count)
+                ProjectHeader(
+                    project: group.project, count: group.sessions.count,
+                    onShowMap: mapAction(for: group.project))
                 ForEach(group.sessions) { session in
                     SessionRow(
                         session: session,
@@ -229,6 +233,11 @@ struct SessionColumn: View {
             }
         }
         .padding(.bottom, KohaiSpacing.sm)
+    }
+
+    private func mapAction(for project: String) -> (() -> Void)? {
+        guard let onShowMap else { return nil }
+        return { onShowMap(project) }
     }
 
     private func move(_ delta: Int) {
